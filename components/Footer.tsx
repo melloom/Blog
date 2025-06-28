@@ -8,9 +8,7 @@ export default function Footer() {
   const { settings } = useSettings()
 
   // Extract site name from title
-  const siteName = settings.siteTitle.includes(' - ') 
-    ? settings.siteTitle.split(' - ')[0] 
-    : settings.siteTitle
+  const siteName = 'Wired Living'
 
   const quickLinks = [
     { name: 'Blog Posts', href: '/posts' },

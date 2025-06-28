@@ -3,9 +3,7 @@
 import { useState, useEffect } from 'react'
 
 interface Settings {
-  siteTitle: string
   siteDescription: string
-  siteUrl: string
   adminEmail: string
   postsPerPage: number
   allowComments: boolean
@@ -46,9 +44,7 @@ interface Settings {
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<Settings>({
-    siteTitle: 'Wired Living',
     siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
-    siteUrl: 'http://localhost:3000',
     adminEmail: 'admin@example.com',
     postsPerPage: 10,
     allowComments: true,
@@ -196,37 +192,15 @@ export default function AdminSettings() {
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Site Title</label>
-                <input
-                  type="text"
-                  value={settings.siteTitle}
-                  onChange={(e) => handleInputChange('siteTitle', e.target.value)}
+                <label className="block text-sm font-medium text-gray-700 mb-2">Site Description</label>
+                <textarea
+                  value={settings.siteDescription}
+                  onChange={(e) => handleInputChange('siteDescription', e.target.value)}
+                  rows={3}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Wired Living"
+                  placeholder="A brief description of your blog"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Site URL</label>
-                <input
-                  type="url"
-                  value={settings.siteUrl}
-                  onChange={(e) => handleInputChange('siteUrl', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="https://example.com"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Site Description</label>
-              <textarea
-                value={settings.siteDescription}
-                onChange={(e) => handleInputChange('siteDescription', e.target.value)}
-                rows={3}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="A brief description of your blog"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
                 <input
@@ -237,6 +211,8 @@ export default function AdminSettings() {
                   placeholder="admin@example.com"
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Posts Per Page</label>
                 <input

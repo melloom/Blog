@@ -34,9 +34,7 @@ export default function Header() {
   }, [session, router])
 
   // Extract site name from title
-  const siteName = settings.siteTitle.includes(' - ') 
-    ? settings.siteTitle.split(' - ')[0] 
-    : settings.siteTitle
+  const siteName = 'Wired Living'
 
   return (
     <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 dark:bg-gray-900/90 dark:border-gray-700">

@@ -20,9 +20,7 @@ export async function GET() {
     
     // Default settings if none exist
     const defaultSettings = {
-      siteTitle: 'Wired Living',
       siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
-      siteUrl: 'http://localhost:3000',
       adminEmail: 'admin@example.com',
       postsPerPage: 10,
       allowComments: true,
@@ -36,7 +34,6 @@ export async function GET() {
       enableRSS: true,
       maintenanceMode: false,
       maintenanceMessage: 'Site is under maintenance. Please check back soon.',
-      // New advanced settings
       defaultPostStatus: 'draft',
       defaultUserRole: 'editor',
       timezone: 'UTC',

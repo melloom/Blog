@@ -2,9 +2,7 @@ import { db } from '@/lib/db'
 import { settings } from '@/lib/db/schema'
 
 export interface BlogSettings {
-  siteTitle: string
   siteDescription: string
-  siteUrl: string
   adminEmail: string
   postsPerPage: number
   allowComments: boolean
@@ -44,9 +42,7 @@ export interface BlogSettings {
 }
 
 const defaultSettings: BlogSettings = {
-  siteTitle: 'WiredLiving - Technology & Life',
-  siteDescription: 'Exploring the intersection of technology and modern living. Insights, tutorials, and thoughts on building a better digital life.',
-  siteUrl: 'http://localhost:3000',
+  siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
   adminEmail: 'admin@example.com',
   postsPerPage: 10,
   allowComments: true,
@@ -74,8 +70,8 @@ const defaultSettings: BlogSettings = {
   secondaryColor: '#1e40af',
   logoUrl: '',
   faviconUrl: '',
-  metaKeywords: 'technology, lifestyle, digital, blog, wiredliving',
-  metaDescription: 'Exploring the intersection of technology and modern living. Insights, tutorials, and thoughts on building a better digital life.',
+  metaKeywords: 'technology, lifestyle, digital, blog, wired living',
+  metaDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
   socialLinks: {
     twitter: '',
     facebook: '',

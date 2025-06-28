@@ -12,10 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
   const settings = await getSettings()
   
   return {
-    title: settings.siteTitle,
+    title: 'Wired Living',
     description: settings.siteDescription,
     keywords: settings.metaKeywords ? settings.metaKeywords.split(',').map(k => k.trim()) : ['technology', 'lifestyle', 'digital', 'blog'],
-    authors: [{ name: settings.siteTitle }],
+    authors: [{ name: 'Wired Living' }],
     icons: {
       icon: [
         { url: '/favicon_io/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -30,15 +30,14 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     manifest: '/favicon_io/site.webmanifest',
     openGraph: {
-      title: settings.siteTitle,
+      title: 'Wired Living',
       description: settings.siteDescription,
-      url: settings.siteUrl,
-      siteName: settings.siteTitle,
+      siteName: 'Wired Living',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
-      title: settings.siteTitle,
+      title: 'Wired Living',
       description: settings.siteDescription,
     },
   }
