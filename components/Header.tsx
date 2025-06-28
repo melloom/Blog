@@ -70,18 +70,6 @@ export default function Header() {
             <SearchBar placeholder="Search posts..." />
           </div>
 
-          {/* Admin Button - Show when logged in */}
-          {session && (
-            <div className="hidden lg:flex items-center space-x-4">
-              <Link
-                href="/admin"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-              >
-                Admin
-              </Link>
-            </div>
-          )}
-
           {/* Mobile menu button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -126,17 +114,6 @@ export default function Header() {
               >
                 Contact
               </Link>
-              
-              {/* Mobile Admin Button */}
-              {session && (
-                <Link
-                  href="/admin"
-                  className="block px-3 py-2 bg-blue-600 text-white rounded-lg text-center font-medium hover:bg-blue-700 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Admin
-                </Link>
-              )}
             </nav>
           </div>
         )}
