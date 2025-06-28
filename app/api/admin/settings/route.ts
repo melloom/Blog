@@ -20,8 +20,8 @@ export async function GET() {
     
     // Default settings if none exist
     const defaultSettings = {
-      siteTitle: 'My Blog',
-      siteDescription: 'A personal blog about technology and life',
+      siteTitle: 'Wired Living',
+      siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
       siteUrl: 'http://localhost:3000',
       adminEmail: 'admin@example.com',
       postsPerPage: 10,

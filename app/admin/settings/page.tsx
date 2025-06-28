@@ -46,8 +46,8 @@ interface Settings {
 
 export default function AdminSettings() {
   const [settings, setSettings] = useState<Settings>({
-    siteTitle: 'My Blog',
-    siteDescription: 'A personal blog about technology and life',
+    siteTitle: 'Wired Living',
+    siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
     siteUrl: 'http://localhost:3000',
     adminEmail: 'admin@example.com',
     postsPerPage: 10,
@@ -202,7 +202,7 @@ export default function AdminSettings() {
                   value={settings.siteTitle}
                   onChange={(e) => handleInputChange('siteTitle', e.target.value)}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="My Awesome Blog"
+                  placeholder="Wired Living"
                 />
               </div>
               <div>
