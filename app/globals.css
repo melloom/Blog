@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
   html {
@@ -93,6 +93,57 @@
     animation-delay: 4s;
   }
   
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  
+  .animation-delay-800 {
+    animation-delay: 800ms;
+  }
+  
+  .animation-delay-1000 {
+    animation-delay: 1s;
+  }
+  
+  .animation-delay-3000 {
+    animation-delay: 3s;
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .animate-twinkle {
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  
+  .animate-spin-slow {
+    animation: spin 8s linear infinite;
+  }
+  
+  .animate-bounce-slow {
+    animation: bounceSlow 4s ease-in-out infinite;
+  }
+  
   @keyframes blob {
     0% {
       transform: translate(0px, 0px) scale(1);
@@ -105,6 +156,54 @@
     }
     100% {
       transform: translate(0px, 0px) scale(1);
+    }
+  }
+  
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes gradientShift {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+  
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.3;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+  
+  @keyframes bounceSlow {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
     }
   }
   
