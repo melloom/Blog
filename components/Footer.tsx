@@ -1,9 +1,16 @@
 'use client'
 
 import Link from 'next/link'
+import { useSettings } from '@/lib/hooks/useSettings'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
+  const { settings } = useSettings()
+
+  // Extract site name from title
+  const siteName = settings.siteTitle.includes(' - ') 
+    ? settings.siteTitle.split(' - ')[0] 
+    : settings.siteTitle
 
   const quickLinks = [
     { name: 'Blog Posts', href: '/posts' },
@@ -21,11 +28,11 @@ export default function Footer() {
   ]
 
   const socialLinks = [
-    { name: 'Twitter', href: 'https://twitter.com/wiredliving', icon: '🐦' },
-    { name: 'LinkedIn', href: 'https://linkedin.com/in/wiredliving', icon: '💼' },
-    { name: 'GitHub', href: 'https://github.com/wiredliving', icon: '💻' },
-    { name: 'YouTube', href: 'https://youtube.com/@wiredliving', icon: '📺' }
-  ]
+    { name: 'Twitter', href: settings.socialLinks.twitter || '#', icon: '🐦' },
+    { name: 'LinkedIn', href: settings.socialLinks.linkedin || '#', icon: '💼' },
+    { name: 'GitHub', href: settings.socialLinks.github || '#', icon: '💻' },
+    { name: 'YouTube', href: '#', icon: '📺' }
+  ].filter(link => link.href !== '#')
 
   return (
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 dark:text-gray-200">
@@ -36,32 +43,34 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <Link href="/" className="inline-flex items-center space-x-2 mb-6">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">W</span>
+                <span className="text-white font-bold text-lg">{siteName.charAt(0)}</span>
               </div>
               <span className="text-2xl font-bold text-white">
-                Wired<span className="text-blue-400">Living</span>
+                {siteName}
               </span>
             </Link>
             
             <p className="text-gray-300 mb-6 leading-relaxed">
-              Exploring the intersection of technology and modern living. Insights, tutorials, and thoughts on building a better digital life.
+              {settings.siteDescription}
             </p>
             
             {/* Social Links */}
-            <div className="flex space-x-4">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.name}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center text-lg transition-all duration-300 hover:scale-110"
-                  title={social.name}
-                >
-                  {social.icon}
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="flex space-x-4">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.name}
+                    href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-10 h-10 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center text-lg transition-all duration-300 hover:scale-110"
+                    title={social.name}
+                  >
+                    {social.icon}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Quick Links */}
@@ -147,8 +156,8 @@ export default function Footer() {
                 <svg className="w-4 h-4 mr-3 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:hello@wiredliving.com" className="hover:text-blue-400 transition-colors">
-                  hello@wiredliving.com
+                <a href={`mailto:${settings.adminEmail}`} className="hover:text-blue-400 transition-colors">
+                  {settings.adminEmail}
                 </a>
               </div>
             </div>
@@ -162,7 +171,7 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             {/* Copyright */}
             <div className="text-gray-400 text-sm dark:text-gray-500">
-              © {currentYear} WiredLiving. All rights reserved.
+              © {currentYear} {siteName}. All rights reserved.
             </div>
             
             {/* Additional Links */}

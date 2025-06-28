@@ -7,11 +7,13 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import ThemeToggle from './ThemeToggle'
 import SearchBar from './SearchBar'
+import { useSettings } from '@/lib/hooks/useSettings'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
+  const { settings } = useSettings()
 
   // Keyboard shortcut for admin access
   useEffect(() => {
@@ -31,6 +33,11 @@ export default function Header() {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [session, router])
 
+  // Extract site name from title
+  const siteName = settings.siteTitle.includes(' - ') 
+    ? settings.siteTitle.split(' - ')[0] 
+    : settings.siteTitle
+
   return (
     <header className="bg-white/90 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 dark:bg-gray-900/90 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,9 +45,9 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">W</span>
+              <span className="text-white font-bold text-sm">{siteName.charAt(0)}</span>
             </div>
-            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">WiredLiving</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-gray-100">{siteName}</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -68,6 +68,19 @@ export const blockedIPs = sqliteTable('blocked_ips', {
   reason: text('reason').notNull(),
   blockedBy: integer('blocked_by').references(() => users.id),
   blockedAt: integer('blocked_at', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  expiresAt: integer('expires_at', { mode: 'timestamp' }),
+});
+
+// Security events table for monitoring security incidents
+export const securityEvents = sqliteTable('security_events', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  type: text('type', { enum: ['failed_login', 'suspicious_ip', 'brute_force', 'spam_comment', 'file_access', 'api_abuse'] }).notNull(),
+  ip: text('ip').notNull(),
+  userAgent: text('user_agent'),
+  details: text('details').notNull(),
+  severity: text('severity', { enum: ['low', 'medium', 'high', 'critical'] }).notNull(),
+  timestamp: integer('timestamp', { mode: 'timestamp' }).$defaultFn(() => new Date()),
+  resolved: integer('resolved', { mode: 'boolean' }).default(false),
 });
 
 // Tags table

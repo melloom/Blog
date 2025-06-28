@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import AdminSidebar from '@/components/admin/AdminSidebar'
 import { filterComment } from '@/lib/content-filter'
 
 interface Comment {
@@ -207,7 +209,6 @@ export default function AdminComments() {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex">
-          <AdminSidebar />
           <div className="flex-1 p-8">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -254,8 +255,6 @@ export default function AdminComments() {
       </header>
 
       <div className="flex">
-        <AdminSidebar />
-        
         <div className="flex-1 p-8">
           {/* Header */}
           <div className="mb-8">

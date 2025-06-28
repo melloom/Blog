@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { posts, categories, tags, postTags, users, likes } from '@/lib/db/schema'
+import { posts, categories, tags, postTags, users, likes, settings } from '@/lib/db/schema'
 import { eq, desc, count, inArray } from 'drizzle-orm'
+import { getSettings } from '@/lib/settings'
 
 // GET /api/posts - Get all posts
 export async function GET(request: NextRequest) {
@@ -9,6 +10,16 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const limit = searchParams.get('limit')
+    const page = searchParams.get('page')
+    
+    // Get settings for default posts per page
+    const blogSettings = await getSettings()
+    const defaultLimit = blogSettings.postsPerPage
+    
+    // Use provided limit or default from settings
+    const postsLimit = limit ? parseInt(limit, 10) : defaultLimit
+    const pageNum = page ? parseInt(page, 10) : 1
+    const offset = (pageNum - 1) * postsLimit
     
     let allPosts
     if (status) {
@@ -20,6 +31,7 @@ export async function GET(request: NextRequest) {
           excerpt: posts.excerpt,
           content: posts.content,
           featuredImage: posts.featuredImage,
+          status: posts.status,
           publishedAt: posts.publishedAt,
           createdAt: posts.createdAt,
           featured: posts.featured,
@@ -32,6 +44,8 @@ export async function GET(request: NextRequest) {
         .leftJoin(users, eq(posts.authorId, users.id))
         .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
         .orderBy(desc(posts.publishedAt || posts.createdAt))
+        .limit(postsLimit)
+        .offset(offset)
         .all()
     } else {
       allPosts = await db
@@ -42,6 +56,7 @@ export async function GET(request: NextRequest) {
           excerpt: posts.excerpt,
           content: posts.content,
           featuredImage: posts.featuredImage,
+          status: posts.status,
           publishedAt: posts.publishedAt,
           createdAt: posts.createdAt,
           featured: posts.featured,
@@ -53,7 +68,26 @@ export async function GET(request: NextRequest) {
         .leftJoin(categories, eq(posts.categoryId, categories.id))
         .leftJoin(users, eq(posts.authorId, users.id))
         .orderBy(desc(posts.publishedAt || posts.createdAt))
+        .limit(postsLimit)
+        .offset(offset)
         .all()
+    }
+    
+    // Get total count for pagination
+    let totalCount
+    if (status) {
+      const countResult = await db
+        .select({ count: count() })
+        .from(posts)
+        .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
+        .get()
+      totalCount = countResult?.count || 0
+    } else {
+      const countResult = await db
+        .select({ count: count() })
+        .from(posts)
+        .get()
+      totalCount = countResult?.count || 0
     }
     
     // Get tags for each post
@@ -92,6 +126,7 @@ export async function GET(request: NextRequest) {
         excerpt: post.excerpt,
         content: post.content,
         featuredImage: post.featuredImage,
+        status: post.status,
         publishedAt: post.publishedAt,
         author: post.authorName,
         category: post.categoryName ? {
@@ -107,15 +142,12 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Apply limit if specified
-    if (limit) {
-      const limitNum = parseInt(limit, 10)
-      transformedPosts.splice(limitNum)
-    }
-    
     return NextResponse.json({
       posts: transformedPosts,
-      total: transformedPosts.length,
+      total: totalCount,
+      page: pageNum,
+      totalPages: Math.ceil(totalCount / postsLimit),
+      postsPerPage: postsLimit,
     })
   } catch (error) {
     console.error('Error fetching posts:', error)

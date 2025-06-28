@@ -30,6 +30,14 @@ interface Post {
   likeCount?: number
 }
 
+interface PostsResponse {
+  posts: Post[]
+  total: number
+  page: number
+  totalPages: number
+  postsPerPage: number
+}
+
 const FALLBACK_IMAGE = 'https://placehold.co/600x400?text=No+Image';
 
 export default function PostsList() {
@@ -37,6 +45,10 @@ export default function PostsList() {
   const [isLoading, setIsLoading] = useState(true)
   const [viewType, setViewType] = useState<PostViewType>('list')
   const [baseUrl, setBaseUrl] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalPosts, setTotalPosts] = useState(0)
+  const [postsPerPage, setPostsPerPage] = useState(10)
 
   useEffect(() => {
     // Set base URL for social sharing
@@ -44,10 +56,14 @@ export default function PostsList() {
     
     const fetchPosts = async () => {
       try {
-        const response = await fetch('/api/posts?status=published')
+        setIsLoading(true)
+        const response = await fetch(`/api/posts?status=published&page=${currentPage}`)
         if (response.ok) {
-          const data = await response.json()
+          const data: PostsResponse = await response.json()
           setPosts(data.posts || [])
+          setTotalPages(data.totalPages)
+          setTotalPosts(data.total)
+          setPostsPerPage(data.postsPerPage)
         }
       } catch (error) {
         console.error('Error fetching posts:', error)
@@ -57,7 +73,12 @@ export default function PostsList() {
     }
 
     fetchPosts()
-  }, [])
+  }, [currentPage])
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   if (isLoading) {
     return (
@@ -359,37 +380,95 @@ export default function PostsList() {
     )
   }
 
+  const renderPagination = () => {
+    if (totalPages <= 1) return null
+
+    const pages = []
+    const maxVisiblePages = 5
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2))
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1)
+
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1)
+    }
+
+    // Previous button
+    if (currentPage > 1) {
+      pages.push(
+        <button
+          key="prev"
+          onClick={() => handlePageChange(currentPage - 1)}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
+        >
+          Previous
+        </button>
+      )
+    }
+
+    // Page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          onClick={() => handlePageChange(i)}
+          className={`px-3 py-2 text-sm font-medium rounded-md ${
+            i === currentPage
+              ? 'bg-blue-600 text-white'
+              : 'text-gray-500 bg-white border border-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700'
+          }`}
+        >
+          {i}
+        </button>
+      )
+    }
+
+    // Next button
+    if (currentPage < totalPages) {
+      pages.push(
+        <button
+          key="next"
+          onClick={() => handlePageChange(currentPage + 1)}
+          className="px-3 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700"
+        >
+          Next
+        </button>
+      )
+    }
+
+    return (
+      <div className="mt-12">
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Showing {((currentPage - 1) * postsPerPage) + 1} to {Math.min(currentPage * postsPerPage, totalPosts)} of {totalPosts} posts
+          </div>
+          <div className="flex items-center space-x-2">
+            {pages}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
       {/* View Toggle */}
       <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-4">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">View:</span>
-          <PostsViewToggle currentView={viewType} onViewChange={setViewType} />
+        <div className="text-sm text-gray-600 dark:text-gray-400">
+          {totalPosts} posts found
         </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          {posts.length} post{posts.length !== 1 ? 's' : ''}
-        </div>
+        <PostsViewToggle currentView={viewType} onViewChange={setViewType} />
       </div>
 
-      {/* Posts Container */}
-      {viewType === 'grid' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {posts.map(renderPostGrid)}
-        </div>
-      )}
-      
-      {viewType === 'list' && (
-        <div className="space-y-6">
-          {posts.map(renderPostList)}
-        </div>
-      )}
-      
-      {viewType === 'cards' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {posts.map(renderPostCard)}
-        </div>
-      )}
+      {/* Posts */}
+      <div className={viewType === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8' : 'space-y-8'}>
+        {viewType === 'grid' 
+          ? posts.map(renderPostGrid)
+          : posts.map(renderPostList)
+        }
+      </div>
+
+      {/* Pagination */}
+      {renderPagination()}
     </div>
   )
 } 

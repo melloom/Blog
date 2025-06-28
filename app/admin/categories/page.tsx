@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AdminSidebar from '@/components/admin/AdminSidebar'
+import Link from 'next/link'
 
 interface Category {
   id: number
@@ -122,7 +122,6 @@ export default function CategoriesPage() {
   if (loading) {
     return (
       <div className="flex">
-        <AdminSidebar />
         <div className="flex-1 p-8">
           <div className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -139,7 +138,6 @@ export default function CategoriesPage() {
 
   return (
     <div className="flex">
-      <AdminSidebar />
       <div className="flex-1 p-8">
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">

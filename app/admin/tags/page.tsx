@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import AdminSidebar from '@/components/admin/AdminSidebar'
+import Link from 'next/link'
 
 interface Tag {
   id: number
@@ -103,7 +103,6 @@ export default function AdminTags() {
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="flex">
-          <AdminSidebar />
           <div className="flex-1 p-8">
             <div className="animate-pulse">
               <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
@@ -150,8 +149,6 @@ export default function AdminTags() {
       </header>
 
       <div className="flex">
-        <AdminSidebar />
-        
         <div className="flex-1 p-8">
           {/* Header */}
           <div className="mb-8">

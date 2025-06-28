@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import AdminSidebar from '@/components/admin/AdminSidebar'
 
 interface BackupData {
   posts: any[]
@@ -312,8 +311,6 @@ export default function BackupPage() {
       </header>
 
       <div className="flex">
-        <AdminSidebar />
-        
         <div className="flex-1 p-8">
           {/* Header */}
           <div className="mb-8">

@@ -7,8 +7,11 @@ import RecentPosts from '@/components/RecentPosts'
 import TrendingPosts from '@/components/TrendingPosts'
 import RandomPost from '@/components/RandomPost'
 import NewsletterSignup from '@/components/NewsletterSignup'
+import { getSettings } from '@/lib/settings'
 
-export default function HomePage() {
+export default async function HomePage() {
+  const settings = await getSettings()
+  
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
@@ -32,13 +35,15 @@ export default function HomePage() {
             
             {/* Main Heading */}
             <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight dark:text-gray-100">
-              Wired
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">Living</span>
+              {settings.siteTitle.split(' - ')[0] || 'Wired'}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
+                {settings.siteTitle.includes(' - ') ? settings.siteTitle.split(' - ')[1] : 'Living'}
+              </span>
             </h1>
             
             {/* Subtitle */}
             <p className="text-xl lg:text-2xl text-gray-600 mb-8 max-w-4xl mx-auto leading-relaxed dark:text-gray-300">
-              Where technology meets lifestyle. Discover insights, tutorials, and thoughtful perspectives on building a better digital life in our connected world.
+              {settings.siteDescription}
             </p>
             
             {/* Stats */}

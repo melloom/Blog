@@ -4,27 +4,44 @@ import './globals.css'
 import Providers from '@/components/Providers'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
+import { getSettings } from '@/lib/settings'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: 'WiredLiving - Technology & Life',
-  description: 'Exploring the intersection of technology and modern living. Insights, tutorials, and thoughts on building a better digital life.',
-  keywords: ['technology', 'lifestyle', 'digital', 'blog', 'wiredliving'],
-  authors: [{ name: 'WiredLiving' }],
-  icons: {
-    icon: [
-      { url: '/favicon_io/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon_io/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    shortcut: '/favicon_io/favicon.ico',
-    apple: '/favicon_io/apple-touch-icon.png',
-    other: [
-      { rel: 'android-chrome-192x192', url: '/favicon_io/android-chrome-192x192.png' },
-      { rel: 'android-chrome-512x512', url: '/favicon_io/android-chrome-512x512.png' },
-    ],
-  },
-  manifest: '/favicon_io/site.webmanifest',
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSettings()
+  
+  return {
+    title: settings.siteTitle,
+    description: settings.siteDescription,
+    keywords: settings.metaKeywords ? settings.metaKeywords.split(',').map(k => k.trim()) : ['technology', 'lifestyle', 'digital', 'blog'],
+    authors: [{ name: settings.siteTitle }],
+    icons: {
+      icon: [
+        { url: '/favicon_io/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+        { url: '/favicon_io/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      ],
+      shortcut: '/favicon_io/favicon.ico',
+      apple: '/favicon_io/apple-touch-icon.png',
+      other: [
+        { rel: 'android-chrome-192x192', url: '/favicon_io/android-chrome-192x192.png' },
+        { rel: 'android-chrome-512x512', url: '/favicon_io/android-chrome-512x512.png' },
+      ],
+    },
+    manifest: '/favicon_io/site.webmanifest',
+    openGraph: {
+      title: settings.siteTitle,
+      description: settings.siteDescription,
+      url: settings.siteUrl,
+      siteName: settings.siteTitle,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: settings.siteTitle,
+      description: settings.siteDescription,
+    },
+  }
 }
 
 export const viewport: Viewport = {
