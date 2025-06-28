@@ -44,7 +44,7 @@ export default function AboutPage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 dark:text-white">My Story</h2>
-                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6 dark:text-white">
+                <div className="text-gray-700 leading-relaxed space-y-6 dark:text-white text-lg">
                   <p>
                     Yo, I'm Melvin Peralta — 22, East Coast raised, and fully immersed in the grind of building dope things with tech. 
                     I don't come from a big team or some VC-funded startup. It's just me, a laptop, and my mind constantly firing off new ideas. 
@@ -102,13 +102,13 @@ export default function AboutPage() {
           <section>
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-12 text-center dark:text-white">My Approach</h2>
             <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-3xl p-8 lg:p-12 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800">
-              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6 dark:text-white">
-                <p className="text-lg">
+              <div className="text-gray-700 leading-relaxed space-y-6 dark:text-white text-lg">
+                <p>
                   I rely heavily on AI not because I'm lazy, but because I know how to mastermind. AI is my teammate, and I use it to execute, 
                   scale, and stretch ideas from concept to live product faster than most teams can run a sprint. If I can automate it, I will. 
                   If I can optimize it, it's already done.
                 </p>
-                <p className="text-lg">
+                <p>
                   I don't play with things I'm not passionate about. If it's not tech, culture, or something that makes people's lives easier 
                   or more creative — I'm out. Real estate? Nah. Agriculture? Respectfully, no. But give me a social media challenge, a way to 
                   remix how people create or consume content, or a niche market that just needs a smarter tool — and I'll be on it.
@@ -122,7 +122,7 @@ export default function AboutPage() {
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
                 <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-8 dark:text-white">My Philosophy</h2>
-                <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed space-y-6 dark:text-white">
+                <div className="text-gray-700 leading-relaxed space-y-6 dark:text-white text-lg">
                   <p>
                     Outside of the code, I'm just a real one. I've seen enough to value loyalty, cut off distractions, and move with purpose. 
                     I've dealt with my fair share of people who move shady — and I don't let that shake me. I block what doesn't serve me and keep building. 
