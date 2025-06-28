@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export TURSO_DATABASE_URL="libsql://blog-melloom.aws-us-east-1.turso.io"
+export TURSO_AUTH_TOKEN="eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTEwMjcxOTcsImlkIjoiZjQ1OWZmM2MtNWIxOC00YWQ0LTk3YmUtYWFiNjQwNDdlNDM5IiwicmlkIjoiMzRmYzBlZTctODlhNS00NzI5LTliNDctMDk2MTRmOGM4MWFhIn0.CZKDubeQhF-ndKUHa4esEdz2yqD4huWaSFTgYnEbbmgP0aP3NztGqf7ar76SA5bO1BdQgaxvCh-Cl9_nV31lBA"
+
+npx drizzle-kit push:sqlite --driver turso --schema ./lib/db/schema.ts --url "libsql://blog-melloom.aws-us-east-1.turso.io" --auth-token "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NTEwMjcxOTcsImlkIjoiZjQ1OWZmM2MtNWIxOC00YWQ0LTk3YmUtYWFiNjQwNDdlNDM5IiwicmlkIjoiMzRmYzBlZTctODlhNS00NzI5LTliNDctMDk2MTRmOGM4MWFhIn0.CZKDubeQhF-ndKUHa4esEdz2yqD4huWaSFTgYnEbbmgP0aP3NztGqf7ar76SA5bO1BdQgaxvCh-Cl9_nV31lBA" 
