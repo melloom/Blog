@@ -35,9 +35,9 @@ export default async function HomePage() {
             
             {/* Main Heading */}
             <h1 className="text-5xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight dark:text-gray-100">
-              {settings.siteTitle.split(' - ')[0] || 'Wired'}
+              Wired
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400">
-                {settings.siteTitle.includes(' - ') ? settings.siteTitle.split(' - ')[1] : 'Living'}
+                Living
               </span>
             </h1>
             
