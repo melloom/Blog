@@ -145,8 +145,14 @@ export default function AnalyticsPage() {
       const res = await fetch(`/api/admin/analytics?provider=${analyticsProvider}&range=${timeRange}`)
       if (!res.ok) throw new Error('Failed to fetch analytics')
       const data = await res.json()
-      if (!data || !data.success || !data.analytics) throw new Error('No analytics data')
-      setAnalytics(data.analytics)
+      
+      // Check if the response has an error field (indicating failure)
+      if (data.error) {
+        throw new Error(data.message || 'Analytics error')
+      }
+      
+      // The API returns analytics data directly, not wrapped in a success/analytics object
+      setAnalytics(data)
     } catch (e) {
       setError(true)
       setAnalytics(null)
