@@ -13,9 +13,6 @@ import {
   ArrowTrendingUpIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline'
-import { dbNonNull as db } from '@/lib/db'
-import { posts, categories, tags, comments, likes, users } from '@/lib/db/schema'
-import { eq, desc, count, and, gte, sql } from 'drizzle-orm'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import AnalyticsToggle from '@/components/AnalyticsToggle'
 
