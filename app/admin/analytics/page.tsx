@@ -103,7 +103,7 @@ interface AnalyticsData {
       publishedAt: string
     }>
   }
-  provider?: 'google' | 'vercel' | 'internal'
+  provider?: 'google' | 'internal'
 }
 
 export default function AnalyticsPage() {
@@ -112,9 +112,9 @@ export default function AnalyticsPage() {
   const [timeRange, setTimeRange] = useState('7d')
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [analyticsProvider, setAnalyticsProvider] = useState<'google' | 'vercel'>(() => {
+  const [analyticsProvider, setAnalyticsProvider] = useState<'google'>(() => {
     if (typeof window !== 'undefined') {
-      return (localStorage.getItem('analyticsProvider') as 'google' | 'vercel') || 'google';
+      return (localStorage.getItem('analyticsProvider') as 'google') || 'google';
     }
     return 'google';
   });
@@ -131,7 +131,7 @@ export default function AnalyticsPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('analyticsProvider') as 'google' | 'vercel';
+      const stored = localStorage.getItem('analyticsProvider') as 'google';
       if (stored) setAnalyticsProvider(stored);
     }
   }, []);

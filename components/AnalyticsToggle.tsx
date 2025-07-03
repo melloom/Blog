@@ -1,26 +1,17 @@
 import React, { useEffect, useState } from 'react';
 
 interface AnalyticsToggleProps {
-  provider: 'google' | 'vercel';
-  setProvider: (provider: 'google' | 'vercel') => void;
+  provider: 'google';
+  setProvider: (provider: 'google') => void;
   isLoading?: boolean;
 }
 
 const AnalyticsToggle: React.FC<AnalyticsToggleProps> = ({ provider, setProvider, isLoading = false }) => {
-  const [selected, setSelected] = useState<'google' | 'vercel'>(provider);
+  const [selected, setSelected] = useState<'google'>(provider);
 
   useEffect(() => {
     setSelected(provider);
   }, [provider]);
-
-  const handleToggle = () => {
-    const newProvider = selected === 'google' ? 'vercel' : 'google';
-    setSelected(newProvider);
-    setProvider(newProvider);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('analyticsProvider', newProvider);
-    }
-  };
 
   return (
     <div className="flex flex-col space-y-3">
@@ -35,27 +26,10 @@ const AnalyticsToggle: React.FC<AnalyticsToggleProps> = ({ provider, setProvider
         <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-1 flex items-center">
           {/* Google Analytics Option */}
           <button
-            onClick={() => {
-              if (selected !== 'google') {
-                setSelected('google');
-                setProvider('google');
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('analyticsProvider', 'google');
-                }
-              }
-            }}
-            className={`relative flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${
-              selected === 'google'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
+            className="relative flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
           >
             <svg
-              className={`w-5 h-5 transition-colors duration-200 ${
-                selected === 'google' 
-                  ? 'text-blue-600 dark:text-blue-400' 
-                  : 'text-gray-500 dark:text-gray-400'
-              }`}
+              className="w-5 h-5 text-blue-600 dark:text-blue-400"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -65,43 +39,7 @@ const AnalyticsToggle: React.FC<AnalyticsToggleProps> = ({ provider, setProvider
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
             <span>Google Analytics</span>
-            {selected === 'google' && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
-            )}
-          </button>
-
-          {/* Vercel Analytics Option */}
-          <button
-            onClick={() => {
-              if (selected !== 'vercel') {
-                setSelected('vercel');
-                setProvider('vercel');
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('analyticsProvider', 'vercel');
-                }
-              }
-            }}
-            className={`relative flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200 ${
-              selected === 'vercel'
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <svg
-              className={`w-5 h-5 transition-colors duration-200 ${
-                selected === 'vercel' 
-                  ? 'text-black dark:text-white' 
-                  : 'text-gray-500 dark:text-gray-400'
-              }`}
-              viewBox="0 0 24 24"
-              fill="currentColor"
-            >
-              <path d="M24 22.525H0l12-21.05 12 21.05z"/>
-            </svg>
-            <span>Vercel Analytics</span>
-            {selected === 'vercel' && (
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
-            )}
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
           </button>
         </div>
       </div>
@@ -109,8 +47,8 @@ const AnalyticsToggle: React.FC<AnalyticsToggleProps> = ({ provider, setProvider
       {/* Status indicator */}
       <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
         <span className="flex items-center space-x-1">
-          <div className={`w-2 h-2 rounded-full ${selected === 'google' ? 'bg-blue-500' : 'bg-black dark:bg-white'}`}></div>
-          <span>Currently using {selected === 'google' ? 'Google Analytics' : 'Vercel Analytics'}</span>
+          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+          <span>Currently using Google Analytics</span>
         </span>
         <span className={`font-medium ${isLoading ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'}`}>
           {isLoading ? 'Loading...' : 'Active'}

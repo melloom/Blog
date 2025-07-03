@@ -3,9 +3,9 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Providers from '@/components/Providers'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import { Analytics } from "@vercel/analytics/next"
 import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { getSettings } from '@/lib/settings'
-import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import ErrorBoundary from '@/components/ErrorBoundary'
 import GlobalErrorHandler from '@/components/GlobalErrorHandler'
@@ -93,7 +93,7 @@ export default function RootLayout({
         {process.env.ANALYTICS_PROVIDER === "google" && process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />
         )}
-        {process.env.ANALYTICS_PROVIDER === "vercel" && <VercelAnalytics />}
+        <Analytics />
       </body>
     </html>
   )

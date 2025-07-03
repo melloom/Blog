@@ -13,8 +13,7 @@ const TEST_CONFIG = {
   baseUrl: process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000',
   endpoints: [
     '/api/admin/analytics?provider=google&range=7d',
-    '/api/admin/analytics?provider=internal&range=7d',
-    '/api/admin/analytics?provider=vercel&range=7d'
+    '/api/admin/analytics?provider=internal&range=7d'
   ]
 };
 
