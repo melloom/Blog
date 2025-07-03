@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { redirect } from 'next/navigation'
 import Providers from '@/components/Providers'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default function AdminLayout({
   children,
@@ -22,22 +23,24 @@ export default function AdminLayout({
 
   return (
     <Providers>
-      <div className="min-h-screen bg-gray-50">
-        {isLoginPage ? (
-          // Login page - no sidebar
-          <main>
-            {children}
-          </main>
-        ) : (
-          // Admin pages - with sidebar
-          <div className="flex">
-            <AdminSidebar />
-            <main className="flex-1 p-6">
+      <ErrorBoundary>
+        <div className="min-h-screen bg-gray-50">
+          {isLoginPage ? (
+            // Login page - no sidebar
+            <main>
               {children}
             </main>
-          </div>
-        )}
-      </div>
+          ) : (
+            // Admin pages - with sidebar
+            <div className="flex">
+              <AdminSidebar />
+              <main className="flex-1 p-6">
+                {children}
+              </main>
+            </div>
+          )}
+        </div>
+      </ErrorBoundary>
     </Providers>
   )
 } 

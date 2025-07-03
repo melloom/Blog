@@ -7,6 +7,8 @@ import ReadingProgressBar from '@/components/ReadingProgressBar'
 import { getSettings } from '@/lib/settings'
 import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
 import Script from 'next/script'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import GlobalErrorHandler from '@/components/GlobalErrorHandler'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -78,12 +80,15 @@ export default function RootLayout({
         )}
       </head>
       <body className={inter.className + " bg-white dark:bg-gray-950"}>
-        <Providers>
-          <ReadingProgressBar />
-          <div className="min-h-screen bg-white dark:bg-gray-950">
-            {children}
-          </div>
-        </Providers>
+        <GlobalErrorHandler />
+        <ErrorBoundary>
+          <Providers>
+            <ReadingProgressBar />
+            <div className="min-h-screen bg-white dark:bg-gray-950">
+              {children}
+            </div>
+          </Providers>
+        </ErrorBoundary>
         {/* Global Analytics Provider (build-time selection) */}
         {process.env.ANALYTICS_PROVIDER === "google" && process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS && (
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS} />

@@ -70,8 +70,9 @@ export function UsernameModal({ isOpen, onClose, onSave }: UsernameModalProps) {
 
 // Theme Context
 const ThemeContext = createContext({
-  theme: 'light',
+  theme: 'light' as 'light' | 'dark',
   setTheme: (theme: 'light' | 'dark') => {},
+  mounted: false,
 });
 
 export function useTheme() {
@@ -79,21 +80,49 @@ export function useTheme() {
 }
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
-    if (typeof window !== 'undefined') {
-      return (localStorage.getItem('theme') as 'light' | 'dark') || 'light';
-    }
-    return 'light';
-  });
+  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    document.documentElement.classList.remove('light', 'dark');
-    document.documentElement.classList.add(theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
+      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+        setTheme(savedTheme);
+      } else {
+        // Check system preference
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        setTheme(systemTheme);
+      }
+      setMounted(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      try {
+        document.documentElement.classList.remove('light', 'dark');
+        document.documentElement.classList.add(theme);
+        localStorage.setItem('theme', theme);
+      } catch (error) {
+        console.warn('Failed to update theme:', error);
+      }
+    }
+  }, [theme, mounted]);
+
+  // Prevent hydration mismatch by not rendering theme-dependent content until mounted
+  if (!mounted) {
+    return (
+      <ThemeContext.Provider value={{ theme: 'light', setTheme: () => {}, mounted: false }}>
+        <div className="min-h-screen bg-white">
+          {children}
+        </div>
+      </ThemeContext.Provider>
+    );
+  }
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme, mounted }}>
       {children}
     </ThemeContext.Provider>
   );

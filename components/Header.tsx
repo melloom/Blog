@@ -8,8 +8,9 @@ import { useRouter } from 'next/navigation'
 import ThemeToggle from './ThemeToggle'
 import SearchBar from './SearchBar'
 import { useSettings } from '@/lib/hooks/useSettings'
+import ErrorBoundary from './ErrorBoundary'
 
-export default function Header() {
+function HeaderContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { data: session } = useSession()
   const router = useRouter()
@@ -119,5 +120,13 @@ export default function Header() {
         )}
       </div>
     </header>
+  )
+}
+
+export default function Header() {
+  return (
+    <ErrorBoundary>
+      <HeaderContent />
+    </ErrorBoundary>
   )
 } 
