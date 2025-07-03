@@ -3,11 +3,56 @@ import { getDb } from '@/lib/db';
 import { settings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-const database = getDb();
-
 // GET /api/admin/settings
 export async function GET() {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      // Return default settings during build
+      const defaultSettings = {
+        siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
+        adminEmail: 'admin@example.com',
+        postsPerPage: 10,
+        allowComments: true,
+        moderateComments: true,
+        autoApproveComments: true,
+        enableAnalytics: false,
+        googleAnalyticsId: '',
+        enableNewsletter: false,
+        newsletterProvider: 'mailchimp',
+        enableSocialSharing: true,
+        enableRSS: true,
+        maintenanceMode: false,
+        maintenanceMessage: 'Site is under maintenance. Please check back soon.',
+        defaultPostStatus: 'draft',
+        defaultUserRole: 'editor',
+        timezone: 'UTC',
+        dateFormat: 'YYYY-MM-DD',
+        customCss: '',
+        customJs: '',
+        disqusShortname: '',
+        showAuthor: true,
+        showReadingTime: true,
+        enableDarkMode: false,
+        primaryColor: '#3b82f6',
+        secondaryColor: '#1e40af',
+        logoUrl: '',
+        faviconUrl: '',
+        metaKeywords: '',
+        metaDescription: '',
+        socialLinks: {
+          twitter: '',
+          facebook: '',
+          instagram: '',
+          linkedin: '',
+          github: ''
+        }
+      };
+      return NextResponse.json({ settings: defaultSettings }, { status: 200 });
+    }
+
+    const database = getDb();
+
     const allSettings = await database.select().from(settings).all();
     
     // Convert settings array to object
@@ -73,6 +118,13 @@ export async function GET() {
 // PUT /api/admin/settings
 export async function PUT(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const body = await request.json();
     const newSettings = body;
     

@@ -3,11 +3,16 @@ import { getDb } from '@/lib/db';
 import { comments } from '@/lib/db/schema';
 import { inArray } from 'drizzle-orm';
 
-const database = getDb();
-
 // PATCH /api/admin/comments/bulk - Bulk actions on comments
 export async function PATCH(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const body = await request.json();
     const { commentIds, action } = body;
 

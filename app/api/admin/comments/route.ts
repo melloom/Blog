@@ -3,11 +3,16 @@ import { getDb } from '@/lib/db';
 import { comments, posts, users, anonymousUsers } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
-const database = getDb();
-
 // GET /api/admin/comments - Get all comments with post and user info
 export async function GET(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ comments: [] }, { status: 200 });
+    }
+
+    const database = getDb();
+
     const allComments = await database
       .select({
         id: comments.id,
