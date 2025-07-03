@@ -1,0 +1,34 @@
+{
+  "version": "5",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1751066620157,
+      "tag": "0000_quick_speed_demon",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1751070783270,
+      "tag": "0001_cuddly_spacker_dave",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1751075151490,
+      "tag": "0002_gifted_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1751093079081,
+      "tag": "0003_lazy_talisman",
+      "breakpoints": true
+    }
+  ]
+}
