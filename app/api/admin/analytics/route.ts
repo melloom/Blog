@@ -3,6 +3,7 @@ import { getDb } from '@/lib/db'
 import { posts, categories, tags, comments, likes, postTags, users } from '@/lib/db/schema'
 import { eq, desc, count, and, gte, sql } from 'drizzle-orm'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
+import { GoogleAuth } from 'google-auth-library'
 
 export async function GET(
   request: NextRequest,
@@ -83,51 +84,43 @@ export async function GET(
         // Handle multiple possible formats of the private key
         let cleanPrivateKey = credentials.private_key
         
-        // Remove any extra escaping that might have been added
+        // Simple approach: just clean up the private key without complex formatting
         if (cleanPrivateKey.includes('\\n')) {
           cleanPrivateKey = cleanPrivateKey.replace(/\\n/g, '\n')
         }
         
-        // Additional cleaning for potential double escaping
-        if (cleanPrivateKey.includes('\\\\n')) {
-          cleanPrivateKey = cleanPrivateKey.replace(/\\\\n/g, '\n')
+        // Ensure proper PEM format
+        if (!cleanPrivateKey.startsWith('-----BEGIN PRIVATE KEY-----')) {
+          cleanPrivateKey = '-----BEGIN PRIVATE KEY-----\n' + cleanPrivateKey
+        }
+        if (!cleanPrivateKey.endsWith('-----END PRIVATE KEY-----')) {
+          cleanPrivateKey = cleanPrivateKey + '\n-----END PRIVATE KEY-----'
         }
         
-        // Ensure the private key has proper PEM format
-        if (!cleanPrivateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-          console.error('Private key does not have proper PEM format')
-          throw new Error('Private key format is invalid - missing PEM headers')
-        }
+        console.log('Private key formatted successfully')
+        console.log('Private key length:', cleanPrivateKey.length)
+        console.log('Private key starts with:', cleanPrivateKey.substring(0, 50))
+        console.log('Private key ends with:', cleanPrivateKey.substring(cleanPrivateKey.length - 50))
         
-        // Ensure proper line breaks in PEM format
-        if (!cleanPrivateKey.includes('\n-----BEGIN PRIVATE KEY-----')) {
-          cleanPrivateKey = cleanPrivateKey.replace('-----BEGIN PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----\n')
-        }
-        if (!cleanPrivateKey.includes('-----END PRIVATE KEY-----\n')) {
-          cleanPrivateKey = cleanPrivateKey.replace('-----END PRIVATE KEY-----', '\n-----END PRIVATE KEY-----')
-        }
-        
-        const cleanCredentials = {
-          type: credentials.type,
-          project_id: credentials.project_id,
-          private_key_id: credentials.private_key_id,
-          private_key: cleanPrivateKey,
-          client_email: credentials.client_email,
-          client_id: credentials.client_id,
-          auth_uri: credentials.auth_uri,
-          token_uri: credentials.token_uri,
-          auth_provider_x509_cert_url: credentials.auth_provider_x509_cert_url,
-          client_x509_cert_url: credentials.client_x509_cert_url
-        }
-        
-        console.log('Clean credentials created')
-        console.log('Private key length:', cleanCredentials.private_key.length)
-        console.log('Private key starts with:', cleanCredentials.private_key.substring(0, 50))
-        console.log('Private key ends with:', cleanCredentials.private_key.substring(cleanCredentials.private_key.length - 50))
+        // Update the credentials object with the cleaned private key
+        credentials.private_key = cleanPrivateKey
         
         let analyticsDataClient
         try {
-          analyticsDataClient = new BetaAnalyticsDataClient({ credentials: cleanCredentials })
+          // Use GoogleAuth library for better credential handling
+          const auth = new GoogleAuth({
+            credentials: {
+              type: credentials.type,
+              project_id: credentials.project_id,
+              private_key_id: credentials.private_key_id,
+              private_key: credentials.private_key,
+              client_email: credentials.client_email,
+              client_id: credentials.client_id
+            },
+            scopes: ['https://www.googleapis.com/auth/analytics.readonly']
+          })
+          
+          analyticsDataClient = new BetaAnalyticsDataClient({ authClient: await auth.getClient() })
           console.log('Google Analytics client initialized successfully')
         } catch (clientError) {
           console.error('Failed to initialize Google Analytics client:', clientError)
