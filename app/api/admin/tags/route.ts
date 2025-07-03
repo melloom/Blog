@@ -3,11 +3,16 @@ import { getDb } from '@/lib/db';
 import { tags } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-const database = getDb();
-
 // GET /api/admin/tags
 export async function GET() {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ tags: [] }, { status: 200 });
+    }
+
+    const database = getDb();
+
     const allTags = await database.select().from(tags).all();
     
     // For now, we'll set postCount to 0 since we don't have the relationship set up yet
@@ -26,6 +31,13 @@ export async function GET() {
 // POST /api/admin/tags
 export async function POST(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const body = await request.json();
     const { name } = body;
     

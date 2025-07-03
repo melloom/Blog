@@ -3,14 +3,19 @@ import { getDb } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql, and, ne } from 'drizzle-orm'
 
-const database = getDb();
-
 // PUT /api/admin/categories/[id] - Update a category
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const { name, slug, description } = await request.json()
     const categoryId = parseInt(params.id)
 
@@ -73,6 +78,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const categoryId = parseInt(params.id)
 
     // Check if category has any posts

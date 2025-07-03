@@ -3,14 +3,19 @@ import { getDb } from '@/lib/db';
 import { tags } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
-const database = getDb();
-
 // PATCH /api/admin/tags/[id]
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const body = await request.json();
     const { name } = body;
     
@@ -47,6 +52,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const deletedTag = await database
       .delete(tags)
       .where(eq(tags.id, parseInt(params.id)))

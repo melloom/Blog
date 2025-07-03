@@ -3,11 +3,16 @@ import { getDb } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
-const database = getDb();
-
 // GET /api/admin/categories - Get all categories with post counts
 export async function GET() {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json([], { status: 200 });
+    }
+
+    const database = getDb();
+
     const categoriesWithCounts = await database
       .select({
         id: categories.id,
@@ -35,6 +40,13 @@ export async function GET() {
 // POST /api/admin/categories - Create a new category
 export async function POST(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const { name, slug, description } = await request.json()
 
     if (!name || !slug) {
