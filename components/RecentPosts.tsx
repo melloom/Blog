@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { posts, categories, users } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { formatDistanceToNow } from 'date-fns'

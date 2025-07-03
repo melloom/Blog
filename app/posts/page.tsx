@@ -1,8 +1,15 @@
 import { Suspense } from 'react'
+import { dbNonNull as db } from '@/lib/db'
+import { posts, categories, users } from '@/lib/db/schema'
+import { eq, and, desc, count } from 'drizzle-orm'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import PostsFilter from '@/components/PostsFilter'
 import PostsList from '@/components/PostsList'
+import PostsViewToggle from '@/components/PostsViewToggle'
 import Sidebar from '@/components/Sidebar'
+import CategoryList from '@/components/CategoryList'
+import { getSettings } from '@/lib/settings'
 
 export default function PostsPage() {
   return (

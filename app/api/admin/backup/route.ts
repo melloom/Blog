@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { posts, comments, categories, tags, users, settings } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 

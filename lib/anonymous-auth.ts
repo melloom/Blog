@@ -1,4 +1,4 @@
-import { db } from '@/lib/db';
+import { dbNonNull as db } from '@/lib/db';
 import { anonymousUsers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';

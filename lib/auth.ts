@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { db } from './db';
-import { users } from './db/schema';
+import { dbNonNull as db } from '@/lib/db';
+import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 export interface JWTPayload {

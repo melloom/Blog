@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { posts, categories, tags, postTags, users, likes, settings } from '@/lib/db/schema'
 import { eq, desc, count, inArray } from 'drizzle-orm'
 import { getSettings } from '@/lib/settings'

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { dbNonNull as db } from '@/lib/db';
 import { blockedIPs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 

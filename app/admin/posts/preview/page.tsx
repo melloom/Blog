@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import ReactMarkdown from 'react-markdown'
+import { dbNonNull as db } from '@/lib/db'
+import { posts, categories, users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+import AdminSidebar from '@/components/admin/AdminSidebar'
+import { formatDistanceToNow } from 'date-fns'
 
 interface PostData {
   title: string

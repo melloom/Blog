@@ -5,6 +5,10 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import SecurityDashboard from '@/components/admin/SecurityDashboard'
+import { dbNonNull as db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import AdminSidebar from '@/components/admin/AdminSidebar'
+import { formatDistanceToNow } from 'date-fns'
 
 interface SystemStatus {
   database: 'healthy' | 'warning' | 'error'

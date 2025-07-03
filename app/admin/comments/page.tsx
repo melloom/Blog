@@ -6,6 +6,10 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { filterComment } from '@/lib/content-filter'
+import { dbNonNull as db } from '@/lib/db'
+import { comments, posts, users, anonymousUsers } from '@/lib/db/schema'
+import { eq, desc } from 'drizzle-orm'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 
 interface Comment {
   id: number

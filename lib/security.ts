@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { securityEvents, blockedIPs } from '@/lib/db/schema'
 import { eq, desc, count, and, gte } from 'drizzle-orm'
 

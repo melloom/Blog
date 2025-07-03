@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { exec } from 'child_process'
 import { promisify } from 'util'

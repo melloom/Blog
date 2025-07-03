@@ -1,5 +1,6 @@
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { settings } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export interface BlogSettings {
   siteDescription: string

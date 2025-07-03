@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { db } from '@/lib/db';
+import { dbNonNull as db } from '@/lib/db';
 import { posts, categories, users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import Header from '@/components/Header';

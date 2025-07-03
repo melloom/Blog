@@ -55,6 +55,9 @@ const client = createDatabaseClient();
 
 export const db = client ? drizzle(client, { schema }) : null;
 
+// Non-null assertion for build-time compatibility
+export const dbNonNull = db!;
+
 // Safe database access function
 export const getDb = () => {
   if (!db) {

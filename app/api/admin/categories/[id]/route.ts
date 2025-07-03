@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql, and, ne } from 'drizzle-orm'
 

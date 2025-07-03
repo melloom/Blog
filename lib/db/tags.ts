@@ -1,4 +1,4 @@
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { tags, postTags, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 

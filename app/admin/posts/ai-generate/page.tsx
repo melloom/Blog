@@ -3,6 +3,11 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { dbNonNull as db } from '@/lib/db'
+import { categories, tags } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
+import AdminSidebar from '@/components/admin/AdminSidebar'
+import { formatDistanceToNow } from 'date-fns'
 
 interface AIGenerationOptions {
   topic: string

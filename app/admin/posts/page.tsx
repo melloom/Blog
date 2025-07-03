@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { dbNonNull as db } from '@/lib/db'
+import { posts, categories, users } from '@/lib/db/schema'
+import { eq, desc, count } from 'drizzle-orm'
+import AdminSidebar from '@/components/admin/AdminSidebar'
+import { formatDistanceToNow } from 'date-fns'
 
 interface Post {
   id: number

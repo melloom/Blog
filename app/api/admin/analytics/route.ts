@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { dbNonNull as db } from '@/lib/db'
 import { posts, categories, tags, comments, likes, postTags, users } from '@/lib/db/schema'
 import { eq, desc, count, and, gte, sql } from 'drizzle-orm'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
