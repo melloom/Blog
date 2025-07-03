@@ -3,14 +3,26 @@ import { getDb } from '@/lib/db'
 import { posts, categories, tags, postTags } from '@/lib/db/schema'
 import { eq, like, or, and, desc, asc, sql } from 'drizzle-orm'
 
-const database = getDb();
-
 // GET /api/search?q=searchterm&type=posts&category=tech&limit=10
 export async function GET(
   request: NextRequest,
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({
+        results: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        query: '',
+        type: 'all'
+      }, { status: 200 });
+    }
+
+    const database = getDb();
+
     // Handle case where searchParams might be undefined during static generation
     const query = searchParams?.get('q') || ''
     const type = searchParams?.get('type') || 'all' // posts, categories, tags, all

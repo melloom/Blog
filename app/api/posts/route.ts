@@ -4,11 +4,22 @@ import { posts, categories, tags, postTags, users, likes, settings } from '@/lib
 import { eq, desc, count, inArray } from 'drizzle-orm'
 import { getSettings } from '@/lib/settings'
 
-const database = getDb();
-
 // GET /api/posts - Get all posts
 export async function GET(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({
+        posts: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        postsPerPage: 10,
+      }, { status: 200 });
+    }
+
+    const database = getDb();
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const limit = searchParams.get('limit')
@@ -163,6 +174,13 @@ export async function GET(request: NextRequest) {
 // POST /api/posts - Create a new post
 export async function POST(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const body = await request.json()
     const { 
       title, 
@@ -299,6 +317,13 @@ export async function POST(request: NextRequest) {
 // PATCH /api/posts/:id - Update a post (including featured status)
 export async function PATCH(request: NextRequest) {
   try {
+    // Check if we're in build time
+    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
+      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
+    }
+
+    const database = getDb();
+
     const { id, featured } = await request.json()
     if (typeof id !== 'number') {
       return NextResponse.json({ error: 'Post ID is required' }, { status: 400 })
