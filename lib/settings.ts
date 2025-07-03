@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { settings } from '@/lib/db/schema'
 
 export interface BlogSettings {
@@ -83,7 +83,6 @@ const defaultSettings: BlogSettings = {
 
 export async function getSettings(): Promise<BlogSettings> {
   try {
-    const db = getDb()
     const allSettings = await db.select().from(settings).all()
     
     // Convert settings array to object

@@ -1,8 +1,6 @@
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { securityEvents, blockedIPs } from '@/lib/db/schema'
 import { eq, desc, count, and, gte } from 'drizzle-orm'
-
-const database = getDb();
 
 export interface SecurityEvent {
   id?: number
@@ -57,7 +55,7 @@ export interface DatabaseHealth {
 // Track failed login attempts
 export async function trackFailedLogin(ip: string, userAgent?: string, details?: string) {
   try {
-    await database.insert(securityEvents).values({
+    await db.insert(securityEvents).values({
       type: 'failed_login',
       ip,
       userAgent,
@@ -68,7 +66,7 @@ export async function trackFailedLogin(ip: string, userAgent?: string, details?:
     })
 
     // Check if this IP has too many failed attempts
-    const recentFailures = await database
+    const recentFailures = await db
       .select({ count: count() })
       .from(securityEvents)
       .where(
@@ -84,7 +82,7 @@ export async function trackFailedLogin(ip: string, userAgent?: string, details?:
 
     if (failureCount >= 5) {
       // Auto-block IP after 5 failed attempts in 15 minutes
-      await database.insert(blockedIPs).values({
+      await db.insert(blockedIPs).values({
         ipAddress: ip,
         reason: 'Multiple failed login attempts',
         blockedAt: new Date(),
@@ -92,7 +90,7 @@ export async function trackFailedLogin(ip: string, userAgent?: string, details?:
       }).onConflictDoNothing()
 
       // Log as high severity event
-      await database.insert(securityEvents).values({
+      await db.insert(securityEvents).values({
         type: 'brute_force',
         ip,
         userAgent,
@@ -110,7 +108,7 @@ export async function trackFailedLogin(ip: string, userAgent?: string, details?:
 // Track suspicious IP patterns
 export async function trackSuspiciousIP(ip: string, pattern: string, userAgent?: string) {
   try {
-    await database.insert(securityEvents).values({
+    await db.insert(securityEvents).values({
       type: 'suspicious_ip',
       ip,
       userAgent,
@@ -132,12 +130,12 @@ export async function getSecurityStats(): Promise<SecurityStats> {
     const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
 
     const [totalEvents, eventsLast24h, eventsLast7d, failedLogins, suspiciousIPs, blockedIPsCount] = await Promise.all([
-      database.select({ count: count() }).from(securityEvents).all(),
-      database.select({ count: count() }).from(securityEvents).where(gte(securityEvents.timestamp, last24h)).all(),
-      database.select({ count: count() }).from(securityEvents).where(gte(securityEvents.timestamp, last7d)).all(),
-      database.select({ count: count() }).from(securityEvents).where(eq(securityEvents.type, 'failed_login')).all(),
-      database.select({ count: count() }).from(securityEvents).where(eq(securityEvents.type, 'suspicious_ip')).all(),
-      database.select({ count: count() }).from(blockedIPs).all()
+      db.select({ count: count() }).from(securityEvents).all(),
+      db.select({ count: count() }).from(securityEvents).where(gte(securityEvents.timestamp, last24h)).all(),
+      db.select({ count: count() }).from(securityEvents).where(gte(securityEvents.timestamp, last7d)).all(),
+      db.select({ count: count() }).from(securityEvents).where(eq(securityEvents.type, 'failed_login')).all(),
+      db.select({ count: count() }).from(securityEvents).where(eq(securityEvents.type, 'suspicious_ip')).all(),
+      db.select({ count: count() }).from(blockedIPs).all()
     ])
 
     // Calculate security score (0-100)
@@ -170,7 +168,7 @@ export async function getSecurityStats(): Promise<SecurityStats> {
 // Get recent security events
 export async function getRecentSecurityEvents(limit: number = 50): Promise<SecurityEvent[]> {
   try {
-    const events = await database
+    const events = await db
       .select()
       .from(securityEvents)
       .orderBy(desc(securityEvents.timestamp))
@@ -198,7 +196,7 @@ export async function checkIPReputation(ip: string): Promise<IPReputation> {
   try {
     // In a real implementation, you would call the AbuseIPDB API
     // For now, we'll simulate the response
-    const isBlocked = await database
+    const isBlocked = await db
       .select()
       .from(blockedIPs)
       .where(eq(blockedIPs.ipAddress, ip))
@@ -266,7 +264,7 @@ export async function checkSSLCertificate(domain: string): Promise<SSLCertificat
 export async function checkDatabaseHealth(): Promise<DatabaseHealth> {
   try {
     // Test database connection
-    await database.select().from(securityEvents).limit(1).all()
+    await db.select().from(securityEvents).limit(1).all()
 
     // Get recent backup info (mock)
     const lastBackup = new Date(Date.now() - 6 * 60 * 60 * 1000) // 6 hours ago

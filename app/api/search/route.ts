@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { posts, categories, tags, postTags } from '@/lib/db/schema'
 import { eq, like, or, and, desc, asc, sql } from 'drizzle-orm'
 
@@ -9,20 +9,6 @@ export async function GET(
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({
-        results: [],
-        total: 0,
-        page: 1,
-        totalPages: 0,
-        query: '',
-        type: 'all'
-      }, { status: 200 });
-    }
-
-    const database = getDb();
-
     // Handle case where searchParams might be undefined during static generation
     const query = searchParams?.get('q') || ''
     const type = searchParams?.get('type') || 'all' // posts, categories, tags, all
@@ -60,7 +46,7 @@ export async function GET(
         whereCondition = and(whereCondition, eq(categories.slug, category))
       }
 
-      const postsResults = await database
+      const postsResults = await db
         .select({
           id: posts.id,
           title: posts.title,
@@ -88,7 +74,7 @@ export async function GET(
 
     // Search categories
     if (type === 'all' || type === 'categories') {
-      const categoriesResults = await database
+      const categoriesResults = await db
         .select({
           id: categories.id,
           name: categories.name,
@@ -114,7 +100,7 @@ export async function GET(
 
     // Search tags
     if (type === 'all' || type === 'tags') {
-      const tagsResults = await database
+      const tagsResults = await db
         .select({
           id: tags.id,
           name: tags.name,
@@ -148,7 +134,7 @@ export async function GET(
     // Get total count for pagination
     let totalCount = 0
     if (type === 'posts') {
-      const countResult = await database
+      const countResult = await db
         .select({ count: sql<number>`count(*)` })
         .from(posts)
         .leftJoin(categories, eq(posts.categoryId, categories.id))

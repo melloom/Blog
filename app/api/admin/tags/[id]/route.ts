@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { tags } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -9,13 +9,6 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const body = await request.json();
     const { name } = body;
     
@@ -26,7 +19,7 @@ export async function PATCH(
     // Create slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
-    const updatedTag = await database
+    const updatedTag = await db
       .update(tags)
       .set({
         name,
@@ -52,14 +45,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
-    const deletedTag = await database
+    const deletedTag = await db
       .delete(tags)
       .where(eq(tags.id, parseInt(params.id)))
       .returning();

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
@@ -9,20 +9,13 @@ export async function GET(
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json([], { status: 200 });
-    }
-
-    const database = getDb();
-
     // Handle case where searchParams might be undefined during static generation
     const status = searchParams?.get('status') || 'published'
     
     // Get categories with post counts
     let categoriesWithCounts
     if (status === 'all') {
-      categoriesWithCounts = await database
+      categoriesWithCounts = await db
         .select({
           id: categories.id,
           name: categories.name,
@@ -35,7 +28,7 @@ export async function GET(
         .groupBy(categories.id, categories.name, categories.slug, categories.description)
         .orderBy(categories.name)
     } else {
-      categoriesWithCounts = await database
+      categoriesWithCounts = await db
         .select({
           id: categories.id,
           name: categories.name,

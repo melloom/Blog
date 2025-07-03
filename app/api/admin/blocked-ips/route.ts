@@ -1,18 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { blockedIPs } from '@/lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 
 // GET /api/admin/blocked-ips - Get all blocked IPs
 export async function GET(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ blockedIPs: [] }, { status: 200 });
-    }
-
-    const database = getDb();
-    const allBlockedIPs = await database
+    const allBlockedIPs = await db
       .select({
         id: blockedIPs.id,
         ipAddress: blockedIPs.ipAddress,
@@ -34,11 +28,6 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/blocked-ips - Block a new IP address
 export async function POST(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
     const body = await request.json();
     const { ipAddress, reason } = body;
 
@@ -46,10 +35,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'IP address and reason are required' }, { status: 400 });
     }
 
-    const database = getDb();
-
     // Check if IP is already blocked
-    const existingBlock = await database
+    const existingBlock = await db
       .select()
       .from(blockedIPs)
       .where(eq(blockedIPs.ipAddress, ipAddress))
@@ -59,7 +46,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'IP address is already blocked' }, { status: 409 });
     }
 
-    const newBlockedIP = await database
+    const newBlockedIP = await db
       .insert(blockedIPs)
       .values({
         ipAddress,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { exec } from 'child_process'
 import { promisify } from 'util'
@@ -9,22 +9,6 @@ const execAsync = promisify(exec)
 
 export async function GET(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ 
-        systemStatus: {
-          database: 'unknown',
-          cache: 'unknown',
-          disk: 'unknown',
-          memory: 'unknown',
-          uptime: 'Unknown',
-          memoryUsage: 'Unknown',
-          diskSpace: 'Unknown',
-          lastBackup: 'Never'
-        }
-      }, { status: 200 });
-    }
-
     const session = await getServerSession()
     
     if (!session) {
@@ -43,11 +27,6 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
     const session = await getServerSession()
     
     if (!session) {
@@ -163,8 +142,7 @@ async function checkDatabaseConnection() {
   try {
     // Simple database connection test using drizzle
     // Use a simple query that should work with any table
-    const database = getDb();
-    await database.select().from(users).limit(1).all()
+    await db.select().from(users).limit(1).all()
     return true
   } catch (error) {
     console.error('Database connection test failed:', error)

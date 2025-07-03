@@ -1,4 +1,4 @@
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { anonymousUsers } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { randomBytes } from 'crypto';
@@ -12,10 +12,10 @@ export function generateAnonymousToken(): string {
 export async function getOrCreateAnonymousUser(token?: string, userIp?: string) {
   if (token) {
     // Try to find existing anonymous user
-    const existingUser = await getDb().select().from(anonymousUsers).where(eq(anonymousUsers.token, token)).get();
+    const existingUser = await db.select().from(anonymousUsers).where(eq(anonymousUsers.token, token)).get();
     if (existingUser) {
       // Update last seen
-      await getDb().update(anonymousUsers)
+      await db.update(anonymousUsers)
         .set({ lastSeen: new Date() })
         .where(eq(anonymousUsers.id, existingUser.id));
       return existingUser;
@@ -24,7 +24,7 @@ export async function getOrCreateAnonymousUser(token?: string, userIp?: string) 
 
   // Create new anonymous user
   const newToken = generateAnonymousToken();
-  const newUser = await getDb().insert(anonymousUsers).values({
+  const newUser = await db.insert(anonymousUsers).values({
     token: newToken,
     userIp: userIp || null,
     lastSeen: new Date(),
@@ -35,13 +35,13 @@ export async function getOrCreateAnonymousUser(token?: string, userIp?: string) 
 
 // Validate anonymous user token
 export async function validateAnonymousToken(token: string) {
-  const user = await getDb().select().from(anonymousUsers).where(eq(anonymousUsers.token, token)).get();
+  const user = await db.select().from(anonymousUsers).where(eq(anonymousUsers.token, token)).get();
   return user || null;
 }
 
 // Update anonymous user display name
 export async function updateAnonymousUserDisplayName(token: string, displayName: string) {
-  const user = await getDb().update(anonymousUsers)
+  const user = await db.update(anonymousUsers)
     .set({ displayName, lastSeen: new Date() })
     .where(eq(anonymousUsers.token, token))
     .returning();

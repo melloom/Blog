@@ -1,17 +1,15 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { posts, categories, users, likes } from '@/lib/db/schema'
 import { eq, desc, count } from 'drizzle-orm'
 import { formatDistanceToNow } from 'date-fns'
 import SocialShareCompact from './SocialShareCompact'
 import LikeButton from './LikeButton'
 
-const database = getDb();
-
 async function getTrendingPosts() {
   try {
-    const trendingPosts = await database
+    const trendingPosts = await db
       .select({
         id: posts.id,
         title: posts.title,

@@ -1,16 +1,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { posts, categories, users } from '@/lib/db/schema'
 import { eq, and, desc } from 'drizzle-orm'
 import { formatDistanceToNow } from 'date-fns'
 import SocialShareCompact from './SocialShareCompact'
 
-const database = getDb();
-
 async function getFeaturedPosts() {
   try {
-    const featuredPosts = await database
+    const featuredPosts = await db
       .select({
         id: posts.id,
         title: posts.title,

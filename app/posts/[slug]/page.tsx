@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { posts, categories, users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import Header from '@/components/Header';
@@ -20,8 +20,7 @@ interface PostPageProps {
 }
 
 async function getPost(slug: string) {
-  const database = getDb();
-  const post = await database
+  const post = await db
     .select({
       id: posts.id,
       title: posts.title,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { blockedIPs } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -11,9 +11,7 @@ export async function DELETE(
   try {
     const { id } = params;
 
-    const database = getDb();
-
-    const deletedBlock = await database
+    const deletedBlock = await db
       .delete(blockedIPs)
       .where(eq(blockedIPs.id, Number(id)))
       .returning();

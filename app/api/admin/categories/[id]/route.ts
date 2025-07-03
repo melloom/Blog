@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql, and, ne } from 'drizzle-orm'
 
@@ -9,13 +9,6 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const { name, slug, description } = await request.json()
     const categoryId = parseInt(params.id)
 
@@ -27,7 +20,7 @@ export async function PUT(
     }
 
     // Check if category with same name or slug already exists (excluding current category)
-    const existingCategory = await database
+    const existingCategory = await db
       .select()
       .from(categories)
       .where(
@@ -45,7 +38,7 @@ export async function PUT(
       )
     }
 
-    const updatedCategory = await database
+    const updatedCategory = await db
       .update(categories)
       .set({
         name,
@@ -78,17 +71,10 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const categoryId = parseInt(params.id)
 
     // Check if category has any posts
-    const postsInCategory = await database
+    const postsInCategory = await db
       .select({ count: sql<number>`COUNT(*)` })
       .from(posts)
       .where(eq(posts.categoryId, categoryId))
@@ -100,7 +86,7 @@ export async function DELETE(
       )
     }
 
-    const deletedCategory = await database
+    const deletedCategory = await db
       .delete(categories)
       .where(eq(categories.id, categoryId))
       .returning()

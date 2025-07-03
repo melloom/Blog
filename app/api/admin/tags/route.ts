@@ -1,19 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { tags } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 // GET /api/admin/tags
 export async function GET() {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ tags: [] }, { status: 200 });
-    }
-
-    const database = getDb();
-
-    const allTags = await database.select().from(tags).all();
+    const allTags = await db.select().from(tags).all();
     
     // For now, we'll set postCount to 0 since we don't have the relationship set up yet
     const tagsWithCount = allTags.map(tag => ({
@@ -31,13 +24,6 @@ export async function GET() {
 // POST /api/admin/tags
 export async function POST(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const body = await request.json();
     const { name } = body;
     
@@ -48,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Create slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
-    const newTag = await database.insert(tags).values({
+    const newTag = await db.insert(tags).values({
       name,
       slug,
     }).returning();

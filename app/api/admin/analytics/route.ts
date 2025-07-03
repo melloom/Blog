@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { posts, categories, tags, comments, likes, postTags, users } from '@/lib/db/schema'
 import { eq, desc, count, and, gte, sql } from 'drizzle-orm'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
@@ -9,41 +9,6 @@ export async function GET(
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
-    // Check if database is available
-    let database
-    try {
-      database = getDb()
-    } catch (error) {
-      console.error('Database not available:', error)
-      return NextResponse.json({
-        error: 'Database not available',
-        totalPosts: 0,
-        totalViews: 0,
-        totalLikes: 0,
-        totalComments: 0,
-        totalUsers: 0,
-        publishedPosts: 0,
-        draftPosts: 0,
-        featuredPosts: 0,
-        recentViews: 0,
-        recentLikes: 0,
-        recentComments: 0,
-        topPosts: [],
-        viewsByDay: [],
-        likesByDay: [],
-        commentsByDay: [],
-        topCategories: [],
-        topTags: [],
-        userEngagement: {
-          averageTimeOnSite: '0m 0s',
-          bounceRate: 0,
-          returnVisitors: 0,
-          newVisitors: 0
-        },
-        provider: 'internal'
-      })
-    }
-
     // Handle case where searchParams might be undefined during static generation
     const provider = searchParams?.get('provider') || 'internal'
     const range = searchParams?.get('range') || '7d'
@@ -419,26 +384,25 @@ export async function GET(
         }
 
         // Get real data from database with Vercel-style enhancements
-        const database = getDb()
         const [totalPosts, publishedPosts, draftPosts, featuredPosts, totalComments, totalLikes, totalUsers] = await Promise.all([
-          database.select({ count: count() }).from(posts).all(),
-          database.select({ count: count() }).from(posts).where(eq(posts.status, 'published')).all(),
-          database.select({ count: count() }).from(posts).where(eq(posts.status, 'draft')).all(),
-          database.select({ count: count() }).from(posts).where(eq(posts.featured, true)).all(),
-          database.select({ count: count() }).from(comments).all(),
-          database.select({ count: count() }).from(likes).all(),
-          database.select({ count: count() }).from(users).all()
+          db.select({ count: count() }).from(posts).all(),
+          db.select({ count: count() }).from(posts).where(eq(posts.status, 'published')).all(),
+          db.select({ count: count() }).from(posts).where(eq(posts.status, 'draft')).all(),
+          db.select({ count: count() }).from(posts).where(eq(posts.featured, true)).all(),
+          db.select({ count: count() }).from(comments).all(),
+          db.select({ count: count() }).from(likes).all(),
+          db.select({ count: count() }).from(users).all()
         ])
 
         // Get recent activity (last 24 hours)
         const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
         const [recentComments, recentLikes] = await Promise.all([
-          database.select({ count: count() }).from(comments).where(gte(comments.createdAt, last24h)).all(),
-          database.select({ count: count() }).from(likes).where(gte(likes.createdAt, last24h)).all()
+          db.select({ count: count() }).from(comments).where(gte(comments.createdAt, last24h)).all(),
+          db.select({ count: count() }).from(likes).where(gte(likes.createdAt, last24h)).all()
         ])
 
         // Get top posts with engagement data
-        const topPosts = await database
+        const topPosts = await db
           .select({
             id: posts.id,
             title: posts.title,
@@ -457,7 +421,7 @@ export async function GET(
           .all()
 
         // Get top categories
-        const topCategories = await database
+        const topCategories = await db
           .select({
             name: categories.name,
             postCount: sql<number>`COUNT(DISTINCT ${posts.id})`.as('postCount'),
@@ -473,7 +437,7 @@ export async function GET(
           .all()
 
         // Get top tags
-        const topTags = await database
+        const topTags = await db
           .select({
             name: tags.name,
             postCount: sql<number>`COUNT(DISTINCT ${posts.id})`.as('postCount')
@@ -583,24 +547,24 @@ export async function GET(
 
     // Get basic counts
     const [totalPosts, publishedPosts, draftPosts, featuredPosts, totalComments, totalLikes, totalUsers] = await Promise.all([
-      database.select({ count: count() }).from(posts).all(),
-      database.select({ count: count() }).from(posts).where(eq(posts.status, 'published')).all(),
-      database.select({ count: count() }).from(posts).where(eq(posts.status, 'draft')).all(),
-      database.select({ count: count() }).from(posts).where(eq(posts.featured, true)).all(),
-      database.select({ count: count() }).from(comments).all(),
-      database.select({ count: count() }).from(likes).all(),
-      database.select({ count: count() }).from(users).all()
+      db.select({ count: count() }).from(posts).all(),
+      db.select({ count: count() }).from(posts).where(eq(posts.status, 'published')).all(),
+      db.select({ count: count() }).from(posts).where(eq(posts.status, 'draft')).all(),
+      db.select({ count: count() }).from(posts).where(eq(posts.featured, true)).all(),
+      db.select({ count: count() }).from(comments).all(),
+      db.select({ count: count() }).from(likes).all(),
+      db.select({ count: count() }).from(users).all()
     ])
 
     // Get recent activity (last 24 hours)
     const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000)
     const [recentComments, recentLikes] = await Promise.all([
-      database.select({ count: count() }).from(comments).where(gte(comments.createdAt, last24h)).all(),
-      database.select({ count: count() }).from(likes).where(gte(likes.createdAt, last24h)).all()
+      db.select({ count: count() }).from(comments).where(gte(comments.createdAt, last24h)).all(),
+      db.select({ count: count() }).from(likes).where(gte(likes.createdAt, last24h)).all()
     ])
 
     // Get top posts with engagement data
-    const topPosts = await database
+    const topPosts = await db
       .select({
         id: posts.id,
         title: posts.title,
@@ -619,7 +583,7 @@ export async function GET(
       .all()
 
     // Get top categories
-    const topCategories = await database
+    const topCategories = await db
       .select({
         name: categories.name,
         postCount: sql<number>`COUNT(DISTINCT ${posts.id})`.as('postCount'),
@@ -635,7 +599,7 @@ export async function GET(
       .all()
 
     // Get top tags
-    const topTags = await database
+    const topTags = await db
       .select({
         name: tags.name,
         postCount: sql<number>`COUNT(DISTINCT ${posts.id})`.as('postCount')

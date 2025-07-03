@@ -1,11 +1,9 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { users } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
-
-const database = getDb();
 
 const handler = NextAuth({
   providers: [
@@ -21,7 +19,7 @@ const handler = NextAuth({
         }
 
         try {
-          const user = await database.select().from(users).where(eq(users.email, credentials.email)).get();
+          const user = await db.select().from(users).where(eq(users.email, credentials.email)).get();
           
           if (!user) {
             return null;

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getDb } from '@/lib/db'
+import { db } from '@/lib/db'
 import { posts, categories, tags, postTags, users, likes, settings } from '@/lib/db/schema'
 import { eq, desc, count, inArray } from 'drizzle-orm'
 import { getSettings } from '@/lib/settings'
@@ -7,19 +7,6 @@ import { getSettings } from '@/lib/settings'
 // GET /api/posts - Get all posts
 export async function GET(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({
-        posts: [],
-        total: 0,
-        page: 1,
-        totalPages: 0,
-        postsPerPage: 10,
-      }, { status: 200 });
-    }
-
-    const database = getDb();
-
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const limit = searchParams.get('limit')
@@ -36,7 +23,7 @@ export async function GET(request: NextRequest) {
     
     let allPosts
     if (status) {
-      allPosts = await database
+      allPosts = await db
         .select({
           id: posts.id,
           title: posts.title,
@@ -61,7 +48,7 @@ export async function GET(request: NextRequest) {
         .offset(offset)
         .all()
     } else {
-      allPosts = await database
+      allPosts = await db
         .select({
           id: posts.id,
           title: posts.title,
@@ -89,14 +76,14 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     let totalCount
     if (status) {
-      const countResult = await database
+      const countResult = await db
         .select({ count: count() })
         .from(posts)
         .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
         .get()
       totalCount = countResult?.count || 0
     } else {
-      const countResult = await database
+      const countResult = await db
         .select({ count: count() })
         .from(posts)
         .get()
@@ -105,7 +92,7 @@ export async function GET(request: NextRequest) {
     
     // Get tags for each post
     const postIds = allPosts.map(post => post.id)
-    const postTagsData = await database
+    const postTagsData = await db
       .select({
         postId: postTags.postId,
         tagName: tags.name,
@@ -117,7 +104,7 @@ export async function GET(request: NextRequest) {
       .all()
     
     // Get like counts for each post
-    const likeCounts = await database
+    const likeCounts = await db
       .select({
         postId: likes.postId,
         count: count(),
@@ -174,13 +161,6 @@ export async function GET(request: NextRequest) {
 // POST /api/posts - Create a new post
 export async function POST(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const body = await request.json()
     const { 
       title, 
@@ -210,11 +190,11 @@ export async function POST(request: NextRequest) {
     let categoryId = null
     if (category && !isDraft) {
       try {
-        const existingCategory = await database.select().from(categories).where(eq(categories.name, category)).get()
+        const existingCategory = await db.select().from(categories).where(eq(categories.name, category)).get()
         if (existingCategory) {
           categoryId = existingCategory.id
         } else {
-          const newCategory = await database.insert(categories).values({
+          const newCategory = await db.insert(categories).values({
             name: category,
             slug: category.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
             description: `${category} category`
@@ -233,7 +213,7 @@ export async function POST(request: NextRequest) {
     // Create the post
     let newPost
     try {
-      newPost = await database.insert(posts).values({
+      newPost = await db.insert(posts).values({
         title,
         content,
         excerpt: excerpt || null,
@@ -259,9 +239,9 @@ export async function POST(request: NextRequest) {
       // Process tags in parallel for better performance
       const tagPromises = tagArray.map(async (tagName) => {
         try {
-          let existingTag = await database.select().from(tags).where(eq(tags.name, tagName)).get()
+          let existingTag = await db.select().from(tags).where(eq(tags.name, tagName)).get()
           if (!existingTag) {
-            const newTag = await database.insert(tags).values({
+            const newTag = await db.insert(tags).values({
               name: tagName,
               slug: tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
             }).returning()
@@ -280,7 +260,7 @@ export async function POST(request: NextRequest) {
       // Insert post-tag relationships in batch
       if (validTagIds.length > 0) {
         try {
-          await database.insert(postTags).values(
+          await db.insert(postTags).values(
             validTagIds.map(tagId => ({ postId, tagId }))
           )
         } catch (relErr) {
@@ -292,7 +272,7 @@ export async function POST(request: NextRequest) {
     // Set publishedAt if status is published and not already set
     if (status === 'published' && !newPost[0].publishedAt) {
       try {
-        await database.update(posts)
+        await db.update(posts)
           .set({ publishedAt: new Date() })
           .where(eq(posts.id, postId))
       } catch (pubErr) {
@@ -317,13 +297,6 @@ export async function POST(request: NextRequest) {
 // PATCH /api/posts/:id - Update a post (including featured status)
 export async function PATCH(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const { id, featured } = await request.json()
     if (typeof id !== 'number') {
       return NextResponse.json({ error: 'Post ID is required' }, { status: 400 })
@@ -334,14 +307,14 @@ export async function PATCH(request: NextRequest) {
 
     // If setting to featured, check how many are already featured
     if (featured) {
-      const featuredCount = await database.select().from(posts).where(eq(posts.featured, true)).all()
+      const featuredCount = await db.select().from(posts).where(eq(posts.featured, true)).all()
       if (featuredCount.length >= 3) {
         return NextResponse.json({ error: 'Maximum 3 featured posts allowed' }, { status: 400 })
       }
     }
 
     // Update the post
-    await database.update(posts).set({ featured }).where(eq(posts.id, id))
+    await db.update(posts).set({ featured }).where(eq(posts.id, id))
     return NextResponse.json({ message: 'Post updated' })
   } catch (error) {
     console.error('Error updating post:', error)

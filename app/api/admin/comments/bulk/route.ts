@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { db } from '@/lib/db';
 import { comments } from '@/lib/db/schema';
 import { inArray } from 'drizzle-orm';
 
 // PATCH /api/admin/comments/bulk - Bulk actions on comments
 export async function PATCH(request: NextRequest) {
   try {
-    // Check if we're in build time
-    if (process.env.NODE_ENV === 'production' && !process.env.TURSO_DATABASE_URL) {
-      return NextResponse.json({ error: 'Service unavailable during build' }, { status: 503 });
-    }
-
-    const database = getDb();
-
     const body = await request.json();
     const { commentIds, action } = body;
 
@@ -26,7 +19,7 @@ export async function PATCH(request: NextRequest) {
 
     if (action === 'delete') {
       // Delete comments
-      const deletedComments = await database
+      const deletedComments = await db
         .delete(comments)
         .where(inArray(comments.id, commentIds))
         .returning();
@@ -39,7 +32,7 @@ export async function PATCH(request: NextRequest) {
       // Update comment status
       const newStatus = action === 'approve' ? 'approved' : 'spam';
       
-      const updatedComments = await database
+      const updatedComments = await db
         .update(comments)
         .set({ status: newStatus })
         .where(inArray(comments.id, commentIds))
