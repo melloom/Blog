@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { comments } from '@/lib/db/schema';
 import { inArray } from 'drizzle-orm';
+
+const database = getDb();
 
 // PATCH /api/admin/comments/bulk - Bulk actions on comments
 export async function PATCH(request: NextRequest) {
@@ -19,7 +21,7 @@ export async function PATCH(request: NextRequest) {
 
     if (action === 'delete') {
       // Delete comments
-      const deletedComments = await db
+      const deletedComments = await database
         .delete(comments)
         .where(inArray(comments.id, commentIds))
         .returning();
@@ -32,7 +34,7 @@ export async function PATCH(request: NextRequest) {
       // Update comment status
       const newStatus = action === 'approve' ? 'approved' : 'spam';
       
-      const updatedComments = await db
+      const updatedComments = await database
         .update(comments)
         .set({ status: newStatus })
         .where(inArray(comments.id, commentIds))

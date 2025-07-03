@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql, and, ne } from 'drizzle-orm'
+
+const database = getDb();
 
 // PUT /api/admin/categories/[id] - Update a category
 export async function PUT(
@@ -20,7 +22,7 @@ export async function PUT(
     }
 
     // Check if category with same name or slug already exists (excluding current category)
-    const existingCategory = await db
+    const existingCategory = await database
       .select()
       .from(categories)
       .where(
@@ -38,7 +40,7 @@ export async function PUT(
       )
     }
 
-    const updatedCategory = await db
+    const updatedCategory = await database
       .update(categories)
       .set({
         name,
@@ -74,7 +76,7 @@ export async function DELETE(
     const categoryId = parseInt(params.id)
 
     // Check if category has any posts
-    const postsInCategory = await db
+    const postsInCategory = await database
       .select({ count: sql<number>`COUNT(*)` })
       .from(posts)
       .where(eq(posts.categoryId, categoryId))
@@ -86,7 +88,7 @@ export async function DELETE(
       )
     }
 
-    const deletedCategory = await db
+    const deletedCategory = await database
       .delete(categories)
       .where(eq(categories.id, categoryId))
       .returning()

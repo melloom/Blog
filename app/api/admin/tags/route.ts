@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { tags } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+
+const database = getDb();
 
 // GET /api/admin/tags
 export async function GET() {
   try {
-    const allTags = await db.select().from(tags).all();
+    const allTags = await database.select().from(tags).all();
     
     // For now, we'll set postCount to 0 since we don't have the relationship set up yet
     const tagsWithCount = allTags.map(tag => ({
@@ -34,7 +36,7 @@ export async function POST(request: NextRequest) {
     // Create slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
-    const newTag = await db.insert(tags).values({
+    const newTag = await database.insert(tags).values({
       name,
       slug,
     }).returning();

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { comments, posts, users, anonymousUsers } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
+
+const database = getDb();
 
 // GET /api/admin/comments - Get all comments with post and user info
 export async function GET(request: NextRequest) {
   try {
-    const allComments = await db
+    const allComments = await database
       .select({
         id: comments.id,
         content: comments.content,

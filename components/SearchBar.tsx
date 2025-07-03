@@ -5,6 +5,7 @@ import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAnalytics } from '@/lib/hooks/useAnalytics'
+import ErrorBoundary from './ErrorBoundary'
 
 interface SearchResult {
   id: number
@@ -27,7 +28,7 @@ interface SearchResponse {
   query: string
 }
 
-export default function SearchBar({ 
+function SearchBarContent({ 
   placeholder = "Search posts, categories, tags...",
   className = "",
   showResults = true,
@@ -295,5 +296,18 @@ export default function SearchBar({
         </div>
       )}
     </div>
+  )
+}
+
+export default function SearchBar(props: {
+  placeholder?: string
+  className?: string
+  showResults?: boolean
+  onSearch?: ((query: string) => void) | null
+}) {
+  return (
+    <ErrorBoundary>
+      <SearchBarContent {...props} />
+    </ErrorBoundary>
   )
 } 

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { settings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+
+const database = getDb();
 
 // GET /api/admin/settings
 export async function GET() {
   try {
-    const allSettings = await db.select().from(settings).all();
+    const allSettings = await database.select().from(settings).all();
     
     // Convert settings array to object
     const settingsObject: any = {};
@@ -82,7 +84,7 @@ export async function PUT(request: NextRequest) {
     
     // Update or insert each setting
     for (const setting of settingsArray) {
-      await db
+      await database
         .insert(settings)
         .values({
           key: setting.key,

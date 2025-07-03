@@ -4,21 +4,34 @@ import './globals.css'
 import Providers from '@/components/Providers'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import ReadingProgressBar from '@/components/ReadingProgressBar'
-import { getSettings } from '@/lib/settings'
 import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
 import Script from 'next/script'
 import ErrorBoundary from '@/components/ErrorBoundary'
-import GlobalErrorHandler from '@/components/GlobalErrorHandler'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSettings()
+  let siteDescription = "Discover the intersection of technology and modern lifestyle. Your guide to digital transformation, productivity hacks, and the future of connected living."
+  let metaKeywords = ['technology', 'lifestyle', 'digital', 'blog']
+  
+  try {
+    const { getSettings } = await import('@/lib/settings')
+    const settings = await getSettings()
+    if (settings.siteDescription) {
+      siteDescription = settings.siteDescription
+    }
+    if (settings.metaKeywords) {
+      metaKeywords = settings.metaKeywords.split(',').map(k => k.trim())
+    }
+  } catch (error) {
+    console.warn('Failed to load settings for metadata:', error)
+    // Use default values if settings fail to load
+  }
   
   return {
     title: 'Wired Living',
-    description: settings.siteDescription,
-    keywords: settings.metaKeywords ? settings.metaKeywords.split(',').map(k => k.trim()) : ['technology', 'lifestyle', 'digital', 'blog'],
+    description: siteDescription,
+    keywords: metaKeywords,
     authors: [{ name: 'Wired Living' }],
     icons: {
       icon: [
@@ -35,14 +48,14 @@ export async function generateMetadata(): Promise<Metadata> {
     manifest: '/favicon_io/site.webmanifest',
     openGraph: {
       title: 'Wired Living',
-      description: settings.siteDescription,
+      description: siteDescription,
       siteName: 'Wired Living',
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: 'Wired Living',
-      description: settings.siteDescription,
+      description: siteDescription,
     },
   }
 }
@@ -80,7 +93,6 @@ export default function RootLayout({
         )}
       </head>
       <body className={inter.className + " bg-white dark:bg-gray-950"}>
-        <GlobalErrorHandler />
         <ErrorBoundary>
           <Providers>
             <ReadingProgressBar />

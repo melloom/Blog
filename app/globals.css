@@ -12,6 +12,33 @@
   body {
     @apply bg-gray-50 text-gray-900;
   }
+
+  /* Prevent visual glitches during theme transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent layout shift during loading */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Better error state styling */
+  .error-state {
+    @apply bg-red-50 border border-red-200 text-red-800 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400;
+  }
+
+  .error-state-light {
+    @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300;
+  }
 }
 
 @layer components {
@@ -142,6 +169,21 @@
   
   .animate-bounce-slow {
     animation: bounceSlow 4s ease-in-out infinite;
+  }
+
+  /* Prevent layout shift during theme transitions */
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* Loading states */
+  .loading-skeleton {
+    @apply animate-pulse bg-gray-200 dark:bg-gray-700;
+  }
+
+  /* Error recovery states */
+  .error-recovery {
+    @apply bg-yellow-50 border border-yellow-200 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-800 dark:text-yellow-400;
   }
   
   @keyframes blob {

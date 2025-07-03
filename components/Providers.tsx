@@ -86,11 +86,18 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Only run on client side
     if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
-      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-        setTheme(savedTheme);
-      } else {
-        // Check system preference
+      try {
+        const savedTheme = localStorage.getItem('theme') as 'light' | 'dark';
+        if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+          setTheme(savedTheme);
+        } else {
+          // Check system preference
+          const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          setTheme(systemTheme);
+        }
+      } catch (error) {
+        console.warn('Failed to load theme from localStorage:', error);
+        // Fallback to system preference
         const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         setTheme(systemTheme);
       }
@@ -114,7 +121,7 @@ function ThemeProvider({ children }: { children: React.ReactNode }) {
   if (!mounted) {
     return (
       <ThemeContext.Provider value={{ theme: 'light', setTheme: () => {}, mounted: false }}>
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-white dark:bg-gray-950">
           {children}
         </div>
       </ThemeContext.Provider>

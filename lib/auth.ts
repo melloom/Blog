@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { db } from './db';
+import { getDb } from './db';
 import { users } from './db/schema';
 import { eq } from 'drizzle-orm';
 
@@ -31,7 +31,8 @@ export function verifyToken(token: string): JWTPayload | null {
 }
 
 export async function authenticateUser(email: string, password: string) {
-  const user = await db.select().from(users).where(eq(users.email, email)).get();
+  const database = getDb();
+  const user = await database.select().from(users).where(eq(users.email, email)).get();
   
   if (!user) {
     return null;
@@ -54,7 +55,7 @@ export async function authenticateUser(email: string, password: string) {
 export async function createUser(email: string, password: string, name: string, role: 'admin' | 'editor' = 'editor') {
   const hashedPassword = await hashPassword(password);
   
-  const result = await db.insert(users).values({
+  const result = await getDb().insert(users).values({
     email,
     password: hashedPassword,
     name,

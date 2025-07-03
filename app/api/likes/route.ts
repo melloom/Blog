@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { likes } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getOrCreateAnonymousUser } from '@/lib/anonymous-auth';
+
+const database = getDb();
 
 // GET /api/likes?postId=123
 export async function GET(request: NextRequest) {
@@ -11,7 +13,7 @@ export async function GET(request: NextRequest) {
   if (!postId) {
     return NextResponse.json({ error: 'postId is required' }, { status: 400 });
   }
-  const count = await db.select().from(likes).where(eq(likes.postId, Number(postId))).all();
+  const count = await database.select().from(likes).where(eq(likes.postId, Number(postId))).all();
   return NextResponse.json({ count: count.length });
 }
 
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Prevent duplicate like
-  const existing = await db.select().from(likes).where(
+  const existing = await database.select().from(likes).where(
     and(
       eq(likes.postId, Number(postId)),
       userId ? eq(likes.userId, userId) : eq(likes.anonymousUserId, anonymousUserId!)
@@ -57,7 +59,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Already liked' }, { status: 409 });
   }
 
-  const newLike = await db.insert(likes).values({
+  const newLike = await database.insert(likes).values({
     postId: Number(postId),
     userId: userId || null,
     anonymousUserId: anonymousUserId || null,

@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { blockedIPs } from '@/lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
+
+const database = getDb();
 
 // GET /api/admin/blocked-ips - Get all blocked IPs
 export async function GET(request: NextRequest) {
   try {
-    const allBlockedIPs = await db
+    const allBlockedIPs = await database
       .select({
         id: blockedIPs.id,
         ipAddress: blockedIPs.ipAddress,
@@ -36,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if IP is already blocked
-    const existingBlock = await db
+    const existingBlock = await database
       .select()
       .from(blockedIPs)
       .where(eq(blockedIPs.ipAddress, ipAddress))
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'IP address is already blocked' }, { status: 409 });
     }
 
-    const newBlockedIP = await db
+    const newBlockedIP = await database
       .insert(blockedIPs)
       .values({
         ipAddress,

@@ -1,11 +1,13 @@
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { tags, postTags, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
+
+const database = getDb();
 
 export async function getTagsWithCounts({ status = 'published', limit = 10 }: { status?: string, limit?: number } = {}) {
   let tagsWithCounts
   if (status === 'all') {
-    tagsWithCounts = await db
+    tagsWithCounts = await database
       .select({
         id: tags.id,
         name: tags.name,
@@ -19,7 +21,7 @@ export async function getTagsWithCounts({ status = 'published', limit = 10 }: { 
       .orderBy(sql`postCount DESC`)
       .limit(limit)
   } else {
-    tagsWithCounts = await db
+    tagsWithCounts = await database
       .select({
         id: tags.id,
         name: tags.name,

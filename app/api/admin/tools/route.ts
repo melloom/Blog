@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { users } from '@/lib/db/schema'
 import { exec } from 'child_process'
 import { promisify } from 'util'
 
 const execAsync = promisify(exec)
+const database = getDb();
 
 export async function GET(request: NextRequest) {
   try {
@@ -142,7 +143,7 @@ async function checkDatabaseConnection() {
   try {
     // Simple database connection test using drizzle
     // Use a simple query that should work with any table
-    await db.select().from(users).limit(1).all()
+    await database.select().from(users).limit(1).all()
     return true
   } catch (error) {
     console.error('Database connection test failed:', error)

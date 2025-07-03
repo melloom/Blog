@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { comments, blockedIPs } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { getOrCreateAnonymousUser } from '@/lib/anonymous-auth';
 import { filterComment } from '@/lib/content-filter';
+
+const database = getDb();
 
 // GET /api/comments?postId=123
 export async function GET(request: NextRequest) {
@@ -14,7 +16,7 @@ export async function GET(request: NextRequest) {
   }
   
   // Only return approved comments for public display
-  const postComments = await db
+  const postComments = await database
     .select()
     .from(comments)
     .where(and(
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest) {
 
   // Check if IP is blocked
   if (userIp !== 'unknown') {
-    const blockedIP = await db
+    const blockedIP = await database
       .select()
       .from(blockedIPs)
       .where(eq(blockedIPs.ipAddress, userIp))
@@ -70,7 +72,7 @@ export async function POST(request: NextRequest) {
     anonymousUserId = anonymousUser.id;
     
     // Create comment with automatic approval status
-    const newComment = await db.insert(comments).values({
+    const newComment = await database.insert(comments).values({
       content,
       authorName,
       authorEmail: authorEmail || 'anonymous@example.com',
@@ -89,7 +91,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Create comment with automatic approval status
-  const newComment = await db.insert(comments).values({
+  const newComment = await database.insert(comments).values({
     content,
     authorName,
     authorEmail: authorEmail || 'anonymous@example.com',

@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, categories, tags, postTags, users, likes, settings } from '@/lib/db/schema'
 import { eq, desc, count, inArray } from 'drizzle-orm'
 import { getSettings } from '@/lib/settings'
+
+const database = getDb();
 
 // GET /api/posts - Get all posts
 export async function GET(request: NextRequest) {
@@ -23,7 +25,7 @@ export async function GET(request: NextRequest) {
     
     let allPosts
     if (status) {
-      allPosts = await db
+      allPosts = await database
         .select({
           id: posts.id,
           title: posts.title,
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
         .offset(offset)
         .all()
     } else {
-      allPosts = await db
+      allPosts = await database
         .select({
           id: posts.id,
           title: posts.title,
@@ -76,14 +78,14 @@ export async function GET(request: NextRequest) {
     // Get total count for pagination
     let totalCount
     if (status) {
-      const countResult = await db
+      const countResult = await database
         .select({ count: count() })
         .from(posts)
         .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
         .get()
       totalCount = countResult?.count || 0
     } else {
-      const countResult = await db
+      const countResult = await database
         .select({ count: count() })
         .from(posts)
         .get()
@@ -92,7 +94,7 @@ export async function GET(request: NextRequest) {
     
     // Get tags for each post
     const postIds = allPosts.map(post => post.id)
-    const postTagsData = await db
+    const postTagsData = await database
       .select({
         postId: postTags.postId,
         tagName: tags.name,
@@ -104,7 +106,7 @@ export async function GET(request: NextRequest) {
       .all()
     
     // Get like counts for each post
-    const likeCounts = await db
+    const likeCounts = await database
       .select({
         postId: likes.postId,
         count: count(),
@@ -190,11 +192,11 @@ export async function POST(request: NextRequest) {
     let categoryId = null
     if (category && !isDraft) {
       try {
-        const existingCategory = await db.select().from(categories).where(eq(categories.name, category)).get()
+        const existingCategory = await database.select().from(categories).where(eq(categories.name, category)).get()
         if (existingCategory) {
           categoryId = existingCategory.id
         } else {
-          const newCategory = await db.insert(categories).values({
+          const newCategory = await database.insert(categories).values({
             name: category,
             slug: category.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
             description: `${category} category`
@@ -213,7 +215,7 @@ export async function POST(request: NextRequest) {
     // Create the post
     let newPost
     try {
-      newPost = await db.insert(posts).values({
+      newPost = await database.insert(posts).values({
         title,
         content,
         excerpt: excerpt || null,
@@ -239,9 +241,9 @@ export async function POST(request: NextRequest) {
       // Process tags in parallel for better performance
       const tagPromises = tagArray.map(async (tagName) => {
         try {
-          let existingTag = await db.select().from(tags).where(eq(tags.name, tagName)).get()
+          let existingTag = await database.select().from(tags).where(eq(tags.name, tagName)).get()
           if (!existingTag) {
-            const newTag = await db.insert(tags).values({
+            const newTag = await database.insert(tags).values({
               name: tagName,
               slug: tagName.toLowerCase().replace(/[^a-z0-9]+/g, '-')
             }).returning()
@@ -260,7 +262,7 @@ export async function POST(request: NextRequest) {
       // Insert post-tag relationships in batch
       if (validTagIds.length > 0) {
         try {
-          await db.insert(postTags).values(
+          await database.insert(postTags).values(
             validTagIds.map(tagId => ({ postId, tagId }))
           )
         } catch (relErr) {
@@ -272,7 +274,7 @@ export async function POST(request: NextRequest) {
     // Set publishedAt if status is published and not already set
     if (status === 'published' && !newPost[0].publishedAt) {
       try {
-        await db.update(posts)
+        await database.update(posts)
           .set({ publishedAt: new Date() })
           .where(eq(posts.id, postId))
       } catch (pubErr) {
@@ -307,14 +309,14 @@ export async function PATCH(request: NextRequest) {
 
     // If setting to featured, check how many are already featured
     if (featured) {
-      const featuredCount = await db.select().from(posts).where(eq(posts.featured, true)).all()
+      const featuredCount = await database.select().from(posts).where(eq(posts.featured, true)).all()
       if (featuredCount.length >= 3) {
         return NextResponse.json({ error: 'Maximum 3 featured posts allowed' }, { status: 400 })
       }
     }
 
     // Update the post
-    await db.update(posts).set({ featured }).where(eq(posts.id, id))
+    await database.update(posts).set({ featured }).where(eq(posts.id, id))
     return NextResponse.json({ message: 'Post updated' })
   } catch (error) {
     console.error('Error updating post:', error)

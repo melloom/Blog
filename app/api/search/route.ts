@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, categories, tags, postTags } from '@/lib/db/schema'
 import { eq, like, or, and, desc, asc, sql } from 'drizzle-orm'
+
+const database = getDb();
 
 // GET /api/search?q=searchterm&type=posts&category=tech&limit=10
 export async function GET(
@@ -46,7 +48,7 @@ export async function GET(
         whereCondition = and(whereCondition, eq(categories.slug, category))
       }
 
-      const postsResults = await db
+      const postsResults = await database
         .select({
           id: posts.id,
           title: posts.title,
@@ -74,7 +76,7 @@ export async function GET(
 
     // Search categories
     if (type === 'all' || type === 'categories') {
-      const categoriesResults = await db
+      const categoriesResults = await database
         .select({
           id: categories.id,
           name: categories.name,
@@ -100,7 +102,7 @@ export async function GET(
 
     // Search tags
     if (type === 'all' || type === 'tags') {
-      const tagsResults = await db
+      const tagsResults = await database
         .select({
           id: tags.id,
           name: tags.name,
@@ -134,7 +136,7 @@ export async function GET(
     // Get total count for pagination
     let totalCount = 0
     if (type === 'posts') {
-      const countResult = await db
+      const countResult = await database
         .select({ count: sql<number>`count(*)` })
         .from(posts)
         .leftJoin(categories, eq(posts.categoryId, categories.id))

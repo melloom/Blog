@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { comments } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+
+const database = getDb();
 
 // PATCH /api/admin/comments/[id] - Update comment status
 export async function PATCH(
@@ -17,7 +19,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
-    const updatedComment = await db
+    const updatedComment = await database
       .update(comments)
       .set({ status })
       .where(eq(comments.id, Number(id)))
@@ -42,7 +44,7 @@ export async function DELETE(
   try {
     const { id } = params;
 
-    const deletedComment = await db
+    const deletedComment = await database
       .delete(comments)
       .where(eq(comments.id, Number(id)))
       .returning();

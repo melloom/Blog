@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
+
+const database = getDb();
 
 // GET /api/admin/categories - Get all categories with post counts
 export async function GET() {
   try {
-    const categoriesWithCounts = await db
+    const categoriesWithCounts = await database
       .select({
         id: categories.id,
         name: categories.name,
@@ -43,7 +45,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if category with same name or slug already exists
-    const existingCategory = await db
+    const existingCategory = await database
       .select()
       .from(categories)
       .where(sql`${categories.name} = ${name} OR ${categories.slug} = ${slug}`)
@@ -56,7 +58,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const newCategory = await db
+    const newCategory = await database
       .insert(categories)
       .values({
         name,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, comments, categories, tags, users, settings } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -48,14 +48,15 @@ export async function POST(request: NextRequest) {
 
 async function getBackupData() {
   try {
+    const database = getDb()
     // Fetch all data from database
     const [postsData, commentsData, categoriesData, tagsData, usersData, settingsData] = await Promise.all([
-      db.select().from(posts).all(),
-      db.select().from(comments).all(),
-      db.select().from(categories).all(),
-      db.select().from(tags).all(),
-      db.select().from(users).all(),
-      db.select().from(settings).all()
+      database.select().from(posts).all(),
+      database.select().from(comments).all(),
+      database.select().from(categories).all(),
+      database.select().from(tags).all(),
+      database.select().from(users).all(),
+      database.select().from(settings).all()
     ])
 
     return {

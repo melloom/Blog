@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
+
+const database = getDb();
 
 // GET /api/categories - Get all categories with post counts
 export async function GET(
@@ -15,7 +17,7 @@ export async function GET(
     // Get categories with post counts
     let categoriesWithCounts
     if (status === 'all') {
-      categoriesWithCounts = await db
+      categoriesWithCounts = await database
         .select({
           id: categories.id,
           name: categories.name,
@@ -28,7 +30,7 @@ export async function GET(
         .groupBy(categories.id, categories.name, categories.slug, categories.description)
         .orderBy(categories.name)
     } else {
-      categoriesWithCounts = await db
+      categoriesWithCounts = await database
         .select({
           id: categories.id,
           name: categories.name,

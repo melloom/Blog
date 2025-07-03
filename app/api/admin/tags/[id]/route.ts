@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { tags } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
+
+const database = getDb();
 
 // PATCH /api/admin/tags/[id]
 export async function PATCH(
@@ -19,7 +21,7 @@ export async function PATCH(
     // Create slug from name
     const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
-    const updatedTag = await db
+    const updatedTag = await database
       .update(tags)
       .set({
         name,
@@ -45,7 +47,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const deletedTag = await db
+    const deletedTag = await database
       .delete(tags)
       .where(eq(tags.id, parseInt(params.id)))
       .returning();

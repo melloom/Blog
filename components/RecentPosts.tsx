@@ -1,14 +1,16 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, categories, users } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { formatDistanceToNow } from 'date-fns'
 import SocialShareCompact from './SocialShareCompact'
 
+const database = getDb();
+
 async function getRecentPosts() {
   try {
-    const recentPosts = await db
+    const recentPosts = await database
       .select({
         id: posts.id,
         title: posts.title,
