@@ -4,11 +4,14 @@ import { posts, categories, tags, comments, likes, postTags, users } from '@/lib
 import { eq, desc, count, and, gte, sql } from 'drizzle-orm'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { searchParams }: { searchParams: URLSearchParams }
+) {
   try {
-    const { searchParams } = new URL(request.url)
-    const provider = searchParams.get('provider') || 'internal'
-    const range = searchParams.get('range') || '7d'
+    // Handle case where searchParams might be undefined during static generation
+    const provider = searchParams?.get('provider') || 'internal'
+    const range = searchParams?.get('range') || '7d'
 
     if (provider === 'google') {
       try {

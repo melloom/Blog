@@ -42,9 +42,9 @@ async function createAdminUser() {
     }
     
     // Check if admin user exists
-    const existingUser = await db.get(sql`SELECT * FROM users WHERE email = 'admin@example.com'`);
+    const existingUser = await db.all(sql`SELECT * FROM users WHERE email = 'admin@example.com'`);
     
-    if (!existingUser) {
+    if (existingUser.length === 0) {
       console.log('Creating admin user...');
       
       const hashedPassword = await bcrypt.hash('admin123', 12);
@@ -59,6 +59,8 @@ async function createAdminUser() {
       console.log('Password: admin123');
     } else {
       console.log('Admin user already exists.');
+      console.log('Email: admin@example.com');
+      console.log('Password: admin123');
     }
     
   } catch (error) {

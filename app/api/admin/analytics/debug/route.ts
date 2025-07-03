@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { searchParams }: { searchParams: URLSearchParams }
+) {
   try {
-    const { searchParams } = new URL(request.url)
-    const provider = searchParams.get('provider') || 'google'
+    // Handle case where searchParams might be undefined during static generation
+    const provider = searchParams?.get('provider') || 'google'
     
     console.log('=== DEBUG START ===')
     console.log('Provider:', provider)

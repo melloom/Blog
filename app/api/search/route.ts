@@ -4,14 +4,17 @@ import { posts, categories, tags, postTags } from '@/lib/db/schema'
 import { eq, like, or, and, desc, asc, sql } from 'drizzle-orm'
 
 // GET /api/search?q=searchterm&type=posts&category=tech&limit=10
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { searchParams }: { searchParams: URLSearchParams }
+) {
   try {
-    const { searchParams } = new URL(request.url)
-    const query = searchParams.get('q') || ''
-    const type = searchParams.get('type') || 'all' // posts, categories, tags, all
-    const category = searchParams.get('category')
-    const limit = parseInt(searchParams.get('limit') || '20')
-    const page = parseInt(searchParams.get('page') || '1')
+    // Handle case where searchParams might be undefined during static generation
+    const query = searchParams?.get('q') || ''
+    const type = searchParams?.get('type') || 'all' // posts, categories, tags, all
+    const category = searchParams?.get('category')
+    const limit = parseInt(searchParams?.get('limit') || '20')
+    const page = parseInt(searchParams?.get('page') || '1')
     const offset = (page - 1) * limit
 
     if (!query.trim()) {

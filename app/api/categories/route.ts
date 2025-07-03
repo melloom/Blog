@@ -4,10 +4,13 @@ import { categories, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
 // GET /api/categories - Get all categories with post counts
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { searchParams }: { searchParams: URLSearchParams }
+) {
   try {
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status') || 'published'
+    // Handle case where searchParams might be undefined during static generation
+    const status = searchParams?.get('status') || 'published'
     
     // Get categories with post counts
     let categoriesWithCounts
