@@ -7,13 +7,25 @@ import { getSettings } from '@/lib/settings'
 // GET /api/posts - Get all posts
 export async function GET(request: NextRequest) {
   try {
+    // Check if database is available
+    if (!db) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
     const limit = searchParams.get('limit')
     const page = searchParams.get('page')
     
     // Get settings for default posts per page
-    const blogSettings = await getSettings()
+    let blogSettings
+    try {
+      blogSettings = await getSettings()
+    } catch (settingsError) {
+      console.error('Settings error:', settingsError)
+      blogSettings = { postsPerPage: 10 } // fallback
+    }
+    
     const defaultLimit = blogSettings.postsPerPage
     
     // Use provided limit or default from settings
@@ -22,97 +34,124 @@ export async function GET(request: NextRequest) {
     const offset = (pageNum - 1) * postsLimit
     
     let allPosts
-    if (status) {
-      allPosts = await db
-        .select({
-          id: posts.id,
-          title: posts.title,
-          slug: posts.slug,
-          excerpt: posts.excerpt,
-          content: posts.content,
-          featuredImage: posts.featuredImage,
-          status: posts.status,
-          publishedAt: posts.publishedAt,
-          createdAt: posts.createdAt,
-          featured: posts.featured,
-          categoryName: categories.name,
-          categorySlug: categories.slug,
-          authorName: users.name,
-        })
-        .from(posts)
-        .leftJoin(categories, eq(posts.categoryId, categories.id))
-        .leftJoin(users, eq(posts.authorId, users.id))
-        .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
-        .orderBy(desc(posts.publishedAt || posts.createdAt))
-        .limit(postsLimit)
-        .offset(offset)
-        .all()
-    } else {
-      allPosts = await db
-        .select({
-          id: posts.id,
-          title: posts.title,
-          slug: posts.slug,
-          excerpt: posts.excerpt,
-          content: posts.content,
-          featuredImage: posts.featuredImage,
-          status: posts.status,
-          publishedAt: posts.publishedAt,
-          createdAt: posts.createdAt,
-          featured: posts.featured,
-          categoryName: categories.name,
-          categorySlug: categories.slug,
-          authorName: users.name,
-        })
-        .from(posts)
-        .leftJoin(categories, eq(posts.categoryId, categories.id))
-        .leftJoin(users, eq(posts.authorId, users.id))
-        .orderBy(desc(posts.publishedAt || posts.createdAt))
-        .limit(postsLimit)
-        .offset(offset)
-        .all()
+    try {
+      if (status) {
+        allPosts = await db
+          .select({
+            id: posts.id,
+            title: posts.title,
+            slug: posts.slug,
+            excerpt: posts.excerpt,
+            content: posts.content,
+            featuredImage: posts.featuredImage,
+            status: posts.status,
+            publishedAt: posts.publishedAt,
+            createdAt: posts.createdAt,
+            featured: posts.featured,
+            categoryName: categories.name,
+            categorySlug: categories.slug,
+            authorName: users.name,
+          })
+          .from(posts)
+          .leftJoin(categories, eq(posts.categoryId, categories.id))
+          .leftJoin(users, eq(posts.authorId, users.id))
+          .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
+          .orderBy(desc(posts.publishedAt || posts.createdAt))
+          .limit(postsLimit)
+          .offset(offset)
+          .all()
+      } else {
+        allPosts = await db
+          .select({
+            id: posts.id,
+            title: posts.title,
+            slug: posts.slug,
+            excerpt: posts.excerpt,
+            content: posts.content,
+            featuredImage: posts.featuredImage,
+            status: posts.status,
+            publishedAt: posts.publishedAt,
+            createdAt: posts.createdAt,
+            featured: posts.featured,
+            categoryName: categories.name,
+            categorySlug: categories.slug,
+            authorName: users.name,
+          })
+          .from(posts)
+          .leftJoin(categories, eq(posts.categoryId, categories.id))
+          .leftJoin(users, eq(posts.authorId, users.id))
+          .orderBy(desc(posts.publishedAt || posts.createdAt))
+          .limit(postsLimit)
+          .offset(offset)
+          .all()
+      }
+    } catch (dbError) {
+      console.error('Database query error:', dbError)
+      return NextResponse.json({ error: 'Database query failed' }, { status: 500 })
     }
     
     // Get total count for pagination
-    let totalCount
-    if (status) {
-      const countResult = await db
-        .select({ count: count() })
-        .from(posts)
-        .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
-        .get()
-      totalCount = countResult?.count || 0
-    } else {
-      const countResult = await db
-        .select({ count: count() })
-        .from(posts)
-        .get()
-      totalCount = countResult?.count || 0
+    let totalCount = 0
+    try {
+      if (status) {
+        const countResult = await db
+          .select({ count: count() })
+          .from(posts)
+          .where(eq(posts.status, status as 'draft' | 'published' | 'archived'))
+          .get()
+        totalCount = countResult?.count || 0
+      } else {
+        const countResult = await db
+          .select({ count: count() })
+          .from(posts)
+          .get()
+        totalCount = countResult?.count || 0
+      }
+    } catch (countError) {
+      console.error('Count query error:', countError)
+      totalCount = allPosts.length // fallback
     }
     
     // Get tags for each post
-    const postIds = allPosts.map(post => post.id)
-    const postTagsData = await db
-      .select({
-        postId: postTags.postId,
-        tagName: tags.name,
-        tagSlug: tags.slug,
-      })
-      .from(postTags)
-      .leftJoin(tags, eq(postTags.tagId, tags.id))
-      .where(inArray(postTags.postId, postIds))
-      .all()
+    let postTagsData: Array<{ postId: number | null; tagName: string | null; tagSlug: string | null }> = []
+    if (allPosts.length > 0) {
+      try {
+        const postIds = allPosts.map(post => post.id)
+        postTagsData = await db
+          .select({
+            postId: postTags.postId,
+            tagName: tags.name,
+            tagSlug: tags.slug,
+          })
+          .from(postTags)
+          .leftJoin(tags, eq(postTags.tagId, tags.id))
+          .where(inArray(postTags.postId, postIds))
+          .all()
+      } catch (tagsError) {
+        console.error('Tags query error:', tagsError)
+        postTagsData = []
+      }
+    }
     
     // Get like counts for each post
-    const likeCounts = await db
-      .select({
-        postId: likes.postId,
-        count: count(),
-      })
-      .from(likes)
-      .where(inArray(likes.postId, postIds))
-      .groupBy(likes.postId)
-      .all()
+    let likeCounts: Array<{ postId: number | null; count: number }> = []
+    if (allPosts.length > 0) {
+      try {
+        const postIds = allPosts.map(post => post.id)
+        likeCounts = await db
+          .select({
+            postId: likes.postId,
+            count: count(),
+          })
+          .from(likes)
+          .where(inArray(likes.postId, postIds))
+          .groupBy(likes.postId)
+          .all()
+      } catch (likesError) {
+        console.error('Likes query error:', likesError)
+        likeCounts = []
+      }
+    }
     
     // Transform the data to match the expected format
     const transformedPosts = allPosts.map(post => {
@@ -161,6 +200,11 @@ export async function GET(request: NextRequest) {
 // POST /api/posts - Create a new post
 export async function POST(request: NextRequest) {
   try {
+    // Check if database is available
+    if (!db) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
     const body = await request.json()
     const { 
       title, 
@@ -297,6 +341,11 @@ export async function POST(request: NextRequest) {
 // PATCH /api/posts/:id - Update a post (including featured status)
 export async function PATCH(request: NextRequest) {
   try {
+    // Check if database is available
+    if (!db) {
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    }
+
     const { id, featured } = await request.json()
     if (typeof id !== 'number') {
       return NextResponse.json({ error: 'Post ID is required' }, { status: 400 })
@@ -307,15 +356,25 @@ export async function PATCH(request: NextRequest) {
 
     // If setting to featured, check how many are already featured
     if (featured) {
-      const featuredCount = await db.select().from(posts).where(eq(posts.featured, true)).all()
-      if (featuredCount.length >= 3) {
-        return NextResponse.json({ error: 'Maximum 3 featured posts allowed' }, { status: 400 })
+      try {
+        const featuredCount = await db.select().from(posts).where(eq(posts.featured, true)).all()
+        if (featuredCount.length >= 3) {
+          return NextResponse.json({ error: 'Maximum 3 featured posts allowed' }, { status: 400 })
+        }
+      } catch (countErr) {
+        console.error('Featured count error:', countErr)
+        return NextResponse.json({ error: 'Failed to check featured posts' }, { status: 500 })
       }
     }
 
     // Update the post
-    await db.update(posts).set({ featured }).where(eq(posts.id, id))
-    return NextResponse.json({ message: 'Post updated' })
+    try {
+      await db.update(posts).set({ featured }).where(eq(posts.id, id))
+      return NextResponse.json({ message: 'Post updated' })
+    } catch (updateErr) {
+      console.error('Post update error:', updateErr)
+      return NextResponse.json({ error: 'Failed to update post' }, { status: 500 })
+    }
   } catch (error) {
     console.error('Error updating post:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
