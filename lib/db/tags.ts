@@ -1,8 +1,17 @@
-import { dbNonNull as db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { tags, postTags, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
 export async function getTagsWithCounts({ status = 'published', limit = 10 }: { status?: string, limit?: number } = {}) {
+  // Try to get the database, but handle the case where it's not available
+  let db
+  try {
+    db = getDb()
+  } catch (dbError) {
+    console.warn('Database not available during build time, returning empty tags')
+    return []
+  }
+
   let tagsWithCounts
   if (status === 'all') {
     tagsWithCounts = await db

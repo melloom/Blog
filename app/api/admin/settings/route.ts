@@ -1,11 +1,60 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbNonNull as db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { settings } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 // GET /api/admin/settings
 export async function GET() {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning default settings')
+      // Return default settings when database is not available
+      const defaultSettings = {
+        siteDescription: 'Exploring the intersection of technology, lifestyle, and modern living',
+        adminEmail: 'admin@example.com',
+        postsPerPage: 10,
+        allowComments: true,
+        moderateComments: true,
+        autoApproveComments: true,
+        enableAnalytics: false,
+        googleAnalyticsId: '',
+        enableNewsletter: false,
+        newsletterProvider: 'mailchimp',
+        enableSocialSharing: true,
+        enableRSS: true,
+        maintenanceMode: false,
+        maintenanceMessage: 'Site is under maintenance. Please check back soon.',
+        defaultPostStatus: 'draft',
+        defaultUserRole: 'editor',
+        timezone: 'UTC',
+        dateFormat: 'YYYY-MM-DD',
+        customCss: '',
+        customJs: '',
+        disqusShortname: '',
+        showAuthor: true,
+        showReadingTime: true,
+        enableDarkMode: false,
+        primaryColor: '#3b82f6',
+        secondaryColor: '#1e40af',
+        logoUrl: '',
+        faviconUrl: '',
+        metaKeywords: '',
+        metaDescription: '',
+        socialLinks: {
+          twitter: '',
+          facebook: '',
+          instagram: '',
+          linkedin: '',
+          github: ''
+        }
+      };
+      return NextResponse.json({ settings: defaultSettings });
+    }
+
     const allSettings = await db.select().from(settings).all();
     
     // Convert settings array to object
@@ -71,6 +120,15 @@ export async function GET() {
 // PUT /api/admin/settings
 export async function PUT(request: NextRequest) {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, cannot update settings')
+      return NextResponse.json({ error: 'Database not available' }, { status: 503 });
+    }
+
     const body = await request.json();
     const newSettings = body;
     

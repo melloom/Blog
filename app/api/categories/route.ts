@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbNonNull as db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { categories, posts } from '@/lib/db/schema'
 import { eq, sql } from 'drizzle-orm'
 
@@ -9,6 +9,15 @@ export async function GET(
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning empty categories')
+      return NextResponse.json([])
+    }
+
     // Handle case where searchParams might be undefined during static generation
     const status = searchParams?.get('status') || 'published'
     

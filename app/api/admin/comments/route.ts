@@ -1,11 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { dbNonNull as db } from '@/lib/db';
+import { getDb } from '@/lib/db';
 import { comments, posts, users, anonymousUsers } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 // GET /api/admin/comments - Get all comments with post and user info
 export async function GET(request: NextRequest) {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning empty comments')
+      return NextResponse.json({ comments: [] })
+    }
+
     const allComments = await db
       .select({
         id: comments.id,

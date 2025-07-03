@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbNonNull as db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, categories, tags, comments, likes, postTags, users } from '@/lib/db/schema'
 import { eq, desc, count, and, gte, sql } from 'drizzle-orm'
 import { BetaAnalyticsDataClient } from '@google-analytics/data'
@@ -9,6 +9,39 @@ export async function GET(
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning empty analytics')
+      return NextResponse.json({
+        totalPosts: 0,
+        totalViews: 0,
+        totalLikes: 0,
+        totalComments: 0,
+        totalUsers: 0,
+        publishedPosts: 0,
+        draftPosts: 0,
+        featuredPosts: 0,
+        recentViews: 0,
+        recentLikes: 0,
+        recentComments: 0,
+        topPosts: [],
+        viewsByDay: [],
+        likesByDay: [],
+        commentsByDay: [],
+        topCategories: [],
+        topTags: [],
+        userEngagement: {
+          averageTimeOnSite: '0m 0s',
+          bounceRate: 0,
+          returnVisitors: 0,
+          newVisitors: 0
+        }
+      })
+    }
+
     // Handle case where searchParams might be undefined during static generation
     const provider = searchParams?.get('provider') || 'internal'
     const range = searchParams?.get('range') || '7d'
