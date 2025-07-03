@@ -170,64 +170,15 @@ export default function AnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="animate-pulse space-y-6">
-        <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-32 bg-gray-200 rounded-lg"></div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
       <div className="text-center py-12">
-        <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-8 h-8 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-4">
+          <svg className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Analytics Error</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-md mx-auto">{error.message}</p>
-        {error.message.includes('Google Analytics') && !error.message.includes('Invalid') && (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 max-w-md mx-auto">
-            <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Setup Instructions:</h4>
-            <ol className="text-xs text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
-              <li>Create a Google Analytics 4 property</li>
-              <li>Set up service account credentials</li>
-              <li>Add GA4_CREDENTIALS_JSON to your environment variables</li>
-              <li>Add GA4_PROPERTY_ID to your environment variables</li>
-              <li>Restart your application</li>
-            </ol>
-          </div>
-        )}
-        
-        {error.message.includes('Invalid Google Analytics credentials') && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 max-w-md mx-auto">
-            <h4 className="text-sm font-medium text-yellow-900 dark:text-yellow-100 mb-2">Credential Format Fix:</h4>
-            <div className="text-xs text-yellow-800 dark:text-yellow-200 space-y-2">
-              <p><strong>Your .env.local should look like this:</strong></p>
-              <pre className="bg-white dark:bg-gray-800 p-2 rounded text-xs overflow-x-auto">
-{`GA4_CREDENTIALS_JSON={"type":"service_account","project_id":"your-project","private_key_id":"key-id","private_key":"-----BEGIN PRIVATE KEY-----\\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC...\\n-----END PRIVATE KEY-----\\n","client_email":"service@project.iam.gserviceaccount.com","client_id":"123456789","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_x509_cert_url":"https://www.googleapis.com/robot/v1/metadata/x509/service%40project.iam.gserviceaccount.com"}`}
-              </pre>
-              <p className="mt-2"><strong>Key points:</strong></p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Must be on a single line</li>
-                <li>All quotes must be escaped with backslashes</li>
-                <li>Newlines in private_key must be \\n</li>
-                <li>No line breaks in the JSON</li>
-              </ul>
-            </div>
-          </div>
-        )}
-        <button
-          onClick={fetchAnalytics}
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          Try Again
-        </button>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">Loading Analytics</h3>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Please wait while we fetch your analytics data...</p>
       </div>
     )
   }
