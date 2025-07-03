@@ -1,8 +1,5 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { dbNonNull as db } from '@/lib/db'
-import { posts, categories, users } from '@/lib/db/schema'
-import { eq, and, desc, count } from 'drizzle-orm'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import FeaturedPosts from '@/components/FeaturedPosts'

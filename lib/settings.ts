@@ -1,4 +1,4 @@
-import { dbNonNull as db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { settings } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 
@@ -84,6 +84,15 @@ const defaultSettings: BlogSettings = {
 
 export async function getSettings(): Promise<BlogSettings> {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, using default settings')
+      return defaultSettings
+    }
+    
     const allSettings = await db.select().from(settings).all()
     
     // Convert settings array to object

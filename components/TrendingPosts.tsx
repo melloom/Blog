@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { dbNonNull as db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, categories, users, likes, comments } from '@/lib/db/schema'
 import { eq, and, desc, sql, count } from 'drizzle-orm'
 import { formatDistanceToNow } from 'date-fns'
@@ -9,6 +9,15 @@ import LikeButton from './LikeButton'
 
 async function getTrendingPosts() {
   try {
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning empty trending posts')
+      return []
+    }
+    
     const trendingPosts = await db
       .select({
         id: posts.id,
