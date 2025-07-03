@@ -1,21 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { dbNonNull as db } from '@/lib/db'
+import { getDb } from '@/lib/db'
 import { posts, categories, tags, postTags, users, likes, settings } from '@/lib/db/schema'
 import { eq, desc, count, inArray } from 'drizzle-orm'
 import { getSettings } from '@/lib/settings'
 
 // GET /api/posts - Get all posts
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { searchParams }: { searchParams: URLSearchParams }
+) {
   try {
-    // Check if database is available
-    if (!db) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning empty posts')
+      return NextResponse.json({
+        posts: [],
+        total: 0,
+        page: 1,
+        totalPages: 0,
+        postsPerPage: 10,
+      })
     }
 
-    const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    const limit = searchParams.get('limit')
-    const page = searchParams.get('page')
+    // During static generation, searchParams might be undefined
+    let status = null
+    let limit = null
+    let page = null
+    
+    if (searchParams && typeof searchParams.get === 'function') {
+      status = searchParams.get('status')
+      limit = searchParams.get('limit')
+      page = searchParams.get('page')
+    }
     
     // Get settings for default posts per page
     let blogSettings
@@ -200,9 +219,13 @@ export async function GET(request: NextRequest) {
 // POST /api/posts - Create a new post
 export async function POST(request: NextRequest) {
   try {
-    // Check if database is available
-    if (!db) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning error')
+      return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 })
     }
 
     const body = await request.json()
@@ -281,7 +304,7 @@ export async function POST(request: NextRequest) {
       const tagArray = tagNames.split(',').map((tag: string) => tag.trim()).filter((tag: string) => tag.length > 0)
       
       // Process tags in parallel for better performance
-      const tagPromises = tagArray.map(async (tagName) => {
+      const tagPromises = tagArray.map(async (tagName: string) => {
         try {
           let existingTag = await db.select().from(tags).where(eq(tags.name, tagName)).get()
           if (!existingTag) {
@@ -299,13 +322,13 @@ export async function POST(request: NextRequest) {
       })
 
       const tagIds = await Promise.all(tagPromises)
-      const validTagIds = tagIds.filter(id => id !== null)
+      const validTagIds = tagIds.filter((id: number | null) => id !== null)
 
       // Insert post-tag relationships in batch
       if (validTagIds.length > 0) {
         try {
           await db.insert(postTags).values(
-            validTagIds.map(tagId => ({ postId, tagId }))
+            validTagIds.map((tagId: number) => ({ postId, tagId }))
           )
         } catch (relErr) {
           console.error('Post-tag relationship error:', relErr)
@@ -341,9 +364,13 @@ export async function POST(request: NextRequest) {
 // PATCH /api/posts/:id - Update a post (including featured status)
 export async function PATCH(request: NextRequest) {
   try {
-    // Check if database is available
-    if (!db) {
-      return NextResponse.json({ error: 'Database not available' }, { status: 503 })
+    // Try to get the database, but handle the case where it's not available
+    let db
+    try {
+      db = getDb()
+    } catch (dbError) {
+      console.warn('Database not available during build time, returning error')
+      return NextResponse.json({ error: 'Service temporarily unavailable' }, { status: 503 })
     }
 
     const { id, featured } = await request.json()

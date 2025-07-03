@@ -7,9 +7,22 @@ export async function GET(
   { searchParams }: { searchParams: URLSearchParams }
 ) {
   try {
-    // Handle case where searchParams might be undefined during static generation
-    const status = searchParams?.get('status') || 'published'
-    const limit = parseInt(searchParams?.get('limit') || '10')
+    // During static generation, searchParams might be undefined or empty
+    // Provide safe defaults to avoid dynamic server usage
+    let status = 'published'
+    let limit = 10
+    
+    // Only try to read searchParams if they exist and we're not in static generation
+    if (searchParams && typeof searchParams.get === 'function') {
+      const statusParam = searchParams.get('status')
+      const limitParam = searchParams.get('limit')
+      
+      if (statusParam) status = statusParam
+      if (limitParam) {
+        const parsedLimit = parseInt(limitParam)
+        if (!isNaN(parsedLimit)) limit = parsedLimit
+      }
+    }
     
     const filteredTags = await getTagsWithCounts({ status, limit })
     return NextResponse.json(filteredTags)

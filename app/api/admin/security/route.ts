@@ -12,14 +12,25 @@ import {
 } from '@/lib/security'
 
 // GET /api/admin/security - Get comprehensive security data
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { searchParams }: { searchParams: URLSearchParams }
+) {
   try {
-    const { searchParams } = new URL(request.url)
-    const action = searchParams.get('action')
-    const ip = searchParams.get('ip')
-    const domain = searchParams.get('domain')
-    const email = searchParams.get('email')
-    const url = searchParams.get('url')
+    // During static generation, searchParams might be undefined
+    let action = null
+    let ip = null
+    let domain = null
+    let email = null
+    let url = null
+    
+    if (searchParams && typeof searchParams.get === 'function') {
+      action = searchParams.get('action')
+      ip = searchParams.get('ip')
+      domain = searchParams.get('domain')
+      email = searchParams.get('email')
+      url = searchParams.get('url')
+    }
 
     switch (action) {
       case 'stats':
