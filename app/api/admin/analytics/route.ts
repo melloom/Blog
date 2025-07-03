@@ -16,23 +16,29 @@ export async function GET(
     if (provider === 'google') {
       try {
         // Check if Google Analytics credentials are configured
-        if (!process.env.GA4_CREDENTIALS_JSON || !process.env.GA4_PROPERTY_ID) {
-          console.log('Google Analytics not configured - missing credentials or property ID')
+        if (!process.env.GA4_TYPE || !process.env.GA4_PROJECT_ID || !process.env.GA4_PRIVATE_KEY_ID || !process.env.GA4_PRIVATE_KEY || !process.env.GA4_CLIENT_EMAIL || !process.env.GA4_CLIENT_ID || !process.env.GA4_AUTH_URI || !process.env.GA4_TOKEN_URI || !process.env.GA4_AUTH_PROVIDER_X509_CERT_URL || !process.env.GA4_CLIENT_X509_CERT_URL || !process.env.GA4_UNIVERSE_DOMAIN || !process.env.GA4_PROPERTY_ID) {
+          console.log('Google Analytics not configured - missing split credentials or property ID')
           throw new Error('Google Analytics not configured')
         }
         
-        // Parse credentials from env with better error handling
-        let credentials
-        try {
-          credentials = JSON.parse(process.env.GA4_CREDENTIALS_JSON)
-        } catch (parseError) {
-          console.error('Failed to parse GA4_CREDENTIALS_JSON:', parseError)
-          throw new Error('Invalid Google Analytics credentials format')
+        // Build credentials from split env vars
+        const credentials = {
+          type: process.env.GA4_TYPE,
+          project_id: process.env.GA4_PROJECT_ID,
+          private_key_id: process.env.GA4_PRIVATE_KEY_ID,
+          private_key: process.env.GA4_PRIVATE_KEY,
+          client_email: process.env.GA4_CLIENT_EMAIL,
+          client_id: process.env.GA4_CLIENT_ID,
+          auth_uri: process.env.GA4_AUTH_URI,
+          token_uri: process.env.GA4_TOKEN_URI,
+          auth_provider_x509_cert_url: process.env.GA4_AUTH_PROVIDER_X509_CERT_URL,
+          client_x509_cert_url: process.env.GA4_CLIENT_X509_CERT_URL,
+          universe_domain: process.env.GA4_UNIVERSE_DOMAIN
         }
         
         // Validate credentials structure
         console.log('Credential fields found:', Object.keys(credentials))
-        const requiredFields = ['type', 'project_id', 'private_key_id', 'private_key', 'client_email']
+        const requiredFields: (keyof typeof credentials)[] = ['type', 'project_id', 'private_key_id', 'private_key', 'client_email']
         const missingFields = requiredFields.filter(field => !credentials[field])
         
         if (missingFields.length > 0) {
@@ -317,7 +323,7 @@ export async function GET(
         if (error instanceof Error && error.message === 'Google Analytics not configured') {
           return NextResponse.json({
             error: 'Google Analytics not configured',
-            message: 'Please configure GA4_CREDENTIALS_JSON and GA4_PROPERTY_ID environment variables',
+            message: 'Please configure GA4_TYPE, GA4_PROJECT_ID, GA4_PRIVATE_KEY_ID, GA4_PRIVATE_KEY, GA4_CLIENT_EMAIL, GA4_CLIENT_ID, GA4_AUTH_URI, GA4_TOKEN_URI, GA4_AUTH_PROVIDER_X509_CERT_URL, GA4_CLIENT_X509_CERT_URL, GA4_UNIVERSE_DOMAIN, and GA4_PROPERTY_ID environment variables',
             provider: 'google',
             fallback: true
           }, { status: 400 })
